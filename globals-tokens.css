@@ -1,0 +1,21 @@
+/*
+  Variables CSS de marca BeWay.
+  Pega esto dentro de :root en tu app/globals.css (Next.js App Router).
+  Deben coincidir siempre con tailwind.config.ts — ver /docs/design-tokens.md
+*/
+
+:root {
+  --brand-dark: #0b132b;
+  --brand-navy: #1c2541;
+  --brand-cyan: #00d4ff;
+  --brand-light: #f8fafc;
+  --brand-gray: #64748b;
+
+  --brand-gradient: linear-gradient(135deg, var(--brand-dark) 0%, var(--brand-cyan) 100%);
+
+  --font-titles: "Space Grotesk", sans-serif; /* placeholder, ver design-tokens.md */
+  --font-body: "Inter", sans-serif;
+
+  --radius-brand: 16px;
+  --shadow-brand: 0 4px 20px rgba(11, 19, 43, 0.08);
+}

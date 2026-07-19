@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  Variables CSS de marca BeWay — ver /design-tokens.md.
+  Deben coincidir siempre con tailwind.config.ts.
+*/
+:root {
+  --brand-dark: #0b132b;
+  --brand-navy: #1c2541;
+  --brand-cyan: #00d4ff;
+  --brand-light: #f8fafc;
+  --brand-gray: #64748b;
+
+  --brand-gradient: linear-gradient(135deg, var(--brand-dark) 0%, var(--brand-cyan) 100%);
+
+  --radius-brand: 16px;
+  --shadow-brand: 0 4px 20px rgba(11, 19, 43, 0.08);
+
+  --background: var(--brand-light);
+  --foreground: var(--brand-dark);
+}
+
+html {
+  height: 100%;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+body {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  color: var(--foreground);
+  background: var(--background);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}

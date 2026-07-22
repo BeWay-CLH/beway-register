@@ -49,3 +49,6 @@ Thumbs.db
 .agents/
 .claude/skills/supabase
 .claude/skills/supabase-postgres-best-practices
+
+.vercel
+.env*

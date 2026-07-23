@@ -6,11 +6,13 @@ Formulario de pre-registro para BeWay (plataforma de "CV Vivo" que conecta estud
 
 ## Estado actual del repo
 
-Este repo está en fase de **planificación/setup**: todavía no hay una app Next.js generada (no hay `package.json`). Lo que sí existe:
+App Next.js scaffoldeada (App Router, TypeScript estricto, Tailwind) y esquema inicial de base de datos ya escrito como migraciones de Supabase. Aún no hay Server Actions ni el formulario real de registro — ver [`docs/pending-decisions.md`](./docs/pending-decisions.md) y las tareas abiertas del equipo para lo siguiente.
 
 | Ruta | Qué es |
 |---|---|
 | `CLAUDE.md` | Especificación completa del proyecto para Claude Code (stack, modelo de datos, seguridad, GDPR, diseño, UX del wizard) |
+| `app/`, `components/`, `lib/` | App Next.js (ver estructura de carpetas en `CLAUDE.md`) |
+| `supabase/migrations/` | Esquema de base de datos versionado — ver [Base de datos](#base-de-datos--migraciones) más abajo |
 | `design-tokens.md` | Manual de marca (colores, tipografía, identidad visual) |
 | `globals-tokens.css` | Tokens de diseño en CSS, derivados del manual de marca |
 | `docs/pending-decisions.md` | Registro vivo de decisiones pendientes (legales/negocio) — lo revisa el agente `planner` antes de planificar |
@@ -40,27 +42,72 @@ Este repo está en fase de **planificación/setup**: todavía no hay una app Nex
 
 3. **Abre Claude Code** (`claude`) en la carpeta del repo y aprueba la conexión al servidor MCP de Supabase (`.mcp.json`) cuando lo pida — usa OAuth, no requiere copiar tokens a mano.
 
-4. **Variables de entorno.** Aún no existe `.env.example` porque no hay app generada todavía. Cuando se scaffoldee el proyecto Next.js, se necesitará un `.env.local` (nunca se commitea, ver `.gitignore`) con, al menos:
+4. **Variables de entorno.** Copia `.env.example` a `.env.local` (nunca se commitea, ver `.gitignore`) y rellena:
    - `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` — del proyecto Supabase (región UE/Frankfurt)
    - `SUPABASE_SERVICE_ROLE_KEY` — **solo servidor**, nunca exponer al cliente
-   - `TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_KEY`
+   - `NEXT_PUBLIC_TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_KEY` (pendiente hasta tener dominio propio)
    - `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` (instancia en región UE)
    - `RESEND_API_KEY` (opcional en esta fase)
 
-5. **Supabase local (día a día):**
+5. **Instala dependencias y levanta la app:**
    ```
-   supabase init      # si no está inicializado
-   supabase start     # levanta Postgres + Auth + Storage en Docker
+   npm install
+   npm run dev
    ```
-   Los correos de Auth se interceptan localmente en `localhost:54324` (Inbucket/Mailpit), sin salir a internet.
 
-6. **Vincula el proyecto cloud correspondiente** cuando toque trabajar contra staging:
-   ```
-   supabase link --project-ref <ref-del-proyecto>
-   ```
-   Hay **dos proyectos cloud separados, ambos en región UE (Frankfurt)**: uno para preview/staging (donde apuntan los Preview Deployments de Vercel) y otro para producción (se crea cerca del lanzamiento). Nunca apuntar un entorno local o de pruebas a producción.
+6. **Base de datos** — ver la sección siguiente para levantar Supabase local y aplicar las migraciones.
 
-7. Cuando exista la app Next.js: `npm install` y `npm run dev`.
+## Base de datos — migraciones
+
+El esquema completo (`profiles`, entradas repetibles del CV Vivo, catálogos, preferencias, privacidad) vive versionado en `supabase/migrations/`. Es la única fuente de verdad del esquema — nunca editar tablas a mano desde el dashboard (ver `CONTRIBUTING.md`).
+
+### Local (día a día)
+
+```
+supabase start     # levanta Postgres + Auth + Storage en Docker (primera vez descarga imágenes, tarda unos minutos)
+supabase db reset  # aplica todas las migraciones desde cero contra el Postgres local
+```
+
+`db reset` es seguro de correr las veces que haga falta: borra y recrea la base local aplicando `supabase/migrations/` en orden. Los correos de Auth se interceptan localmente en `localhost:54324` (Inbucket/Mailpit), sin salir a internet. El Studio local queda en `localhost:54323` para inspeccionar tablas/RLS con la UI.
+
+> **Docker Desktop en Windows**: el servicio de `analytics` (logflare) requiere el daemon de Docker expuesto por TCP, que no viene habilitado por defecto — sin eso, `supabase start` falla o hace rollback de todo el stack. Por eso `supabase/config.toml` trae `[analytics] enabled = false`. Si tu equipo necesita analytics local, expón el daemon por TCP en Docker Desktop y reactívalo ahí.
+
+`lib/supabase/database.types.ts` ya está generado y commiteado, y `lib/supabase/client.ts` / `server.ts` ya están tipados con `createClient<Database>(...)`. Cada vez que cambie el esquema (migración nueva), regenera ese archivo — **nunca se escribe a mano**:
+
+```
+supabase gen types typescript --local > lib/supabase/database.types.ts
+```
+
+### Aplicar a un proyecto cloud (staging o producción)
+
+Cada proyecto cloud (staging y producción son **proyectos separados**, ver `CLAUDE.md` > Entornos) se vincula y sincroniza así:
+
+```
+supabase link --project-ref <ref-del-proyecto>
+supabase db push
+```
+
+`db push` aplica solo las migraciones que ese proyecto todavía no tiene (lleva su propio historial en `supabase_migrations.schema_migrations`), así que es seguro correrlo repetidamente. Para el proyecto de staging ya vinculado en `.mcp.json` (`ejrxjqggivkyphrtwjwk`):
+
+```
+supabase link --project-ref ejrxjqggivkyphrtwjwk
+supabase db push
+```
+
+**Antes de mergear una migración nueva a `main`**: `git pull origin main`, corre `supabase db reset` local para confirmar que aplica limpio sobre el estado más reciente (no sobre el estado de cuando abriste tu rama) — ver `CONTRIBUTING.md` sobre coordinación de migraciones con varias personas tocando el esquema.
+
+### Qué contienen las migraciones iniciales
+
+1. `catalogs` — todas las tablas de catálogo (países, universidades, carreras, idiomas, etc.) con lectura pública y semillas iniciales en español. Añadir opciones = `insert` una fila, no tocar código.
+2. `profiles` — cuenta + info personal (Pasos 1-3). **Importante para quien construya el registro**: no hay trigger automático sobre `auth.users` — la Server Action de signup debe insertar la fila de `profiles` explícitamente (`id = id del usuario recién creado`) justo después de `supabase.auth.signUp()`, porque campos como `full_name` o `terms_accepted_at` no existen en `auth.users`.
+3. `profile_entries` — `education`, `experiences`, `projects`, `certifications`, `skills`, `languages`, `evidences`. `experiences`/`projects`/`certifications` aplican el límite de 3 vía un trigger compartido (`enforce_max_entries_per_profile`); subir el límite en el futuro es cambiar el argumento del trigger, no rediseñar el esquema.
+4. `preferences_and_privacy` — preferencias profesionales (con tablas puente N:M para selección múltiple de tipo de oportunidad/modalidad/sector) y ajustes de privacidad.
+
+Todas las tablas tienen RLS habilitado: cada usuario solo lee/escribe sus propias filas; los catálogos son de lectura pública y escritura solo por service role. El borrado de cuenta (GDPR) se resuelve con `supabase.auth.admin.deleteUser(id)` — al borrar la fila de `auth.users`, la cascada de FKs (`on delete cascade`) limpia `profiles` y todas sus tablas hijas en una sola operación.
+
+**Si agregas una tabla nueva**: RLS habilitado + policies no es suficiente por sí solo — Postgres exige además un `GRANT` de base sobre la tabla para el rol (`anon`/`authenticated`/`service_role`) antes de evaluar las policies; sin el grant, da "permission denied" aunque las policies estén bien. Cada migración de este repo incluye su bloque `grant` al final — cópialo como referencia.
+
+Las 4 migraciones ya se probaron de punta a punta contra Postgres local (Docker): aplican limpio con `supabase db reset`, el aislamiento por usuario vía RLS+grants funciona, el trigger de máximo 3 entradas rechaza la cuarta, y el cascade delete desde `auth.users` limpia todo (perfil, entradas, preferencias) en una sola operación.
 
 ## Convenciones de desarrollo
 

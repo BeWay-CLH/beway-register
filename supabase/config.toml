@@ -386,7 +386,11 @@ deno_version = 2
 # secret_key = "env(SECRET_VALUE)"
 
 [analytics]
-enabled = true
+# Desactivado: en Docker Desktop para Windows, logflare requiere el daemon
+# de Docker expuesto por TCP (tcp://localhost:2375), que no viene habilitado
+# por defecto y no hace falta para desarrollo de esquema/RLS. Si tu equipo
+# lo necesita, actívalo y expón el daemon por TCP en Docker Desktop.
+enabled = false
 port = 54327
 # Configure one of the supported backends: `postgres`, `bigquery`.
 backend = "postgres"

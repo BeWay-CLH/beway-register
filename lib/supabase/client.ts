@@ -1,10 +1,9 @@
 import { createBrowserClient } from "@supabase/ssr";
+import type { Database } from "@/lib/supabase/database.types";
 
 // Cliente de Supabase para Client Components.
-// TODO: tipar con `<Database>` una vez existan migraciones y se corra
-// `supabase gen types typescript`.
 export function createClient() {
-  return createBrowserClient(
+  return createBrowserClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
   );

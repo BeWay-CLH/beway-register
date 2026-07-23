@@ -20,9 +20,6 @@ export type CatalogTable =
   | "project_types"
   | "certification_types";
 
-// TODO: una vez existan migraciones, correr
-// `supabase gen types typescript --local > lib/supabase/database.types.ts`
-// y tipar este cliente con `<Database>` en vez de dejarlo genérico.
 export const getCatalog = cache(async (table: CatalogTable) => {
   const supabase = await createClient();
   const { data, error } = await supabase.from(table).select("*");

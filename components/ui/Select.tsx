@@ -1,5 +1,6 @@
 import { forwardRef, useId, type SelectHTMLAttributes } from "react";
 import { clsx } from "clsx";
+import { ChevronDown } from "lucide-react";
 
 export type SelectOption = {
   value: string | number;
@@ -7,34 +8,32 @@ export type SelectOption = {
 };
 
 type SelectProps = SelectHTMLAttributes<HTMLSelectElement> & {
-  label: string;
   options: SelectOption[];
   placeholder?: string;
-  error?: string;
+  invalid?: boolean;
 };
 
+// Desplegable — BeWay Design System > components/forms/Select. Sin
+// label/error propios: se envuelve en <Field> (ver components/ui/Field).
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ label, options, placeholder, error, className, id, ...props }, ref) => {
+  ({ options, placeholder, invalid = false, className, id, ...props }, ref) => {
     const generatedId = useId();
-    const selectId = id ?? generatedId;
-    const errorId = `${selectId}-error`;
-
     return (
-      <div className="flex flex-col gap-1.5 text-left">
-        <label htmlFor={selectId} className="font-body text-small font-medium text-brand-dark">
-          {label}
-        </label>
+      <div className="relative w-full">
         <select
           ref={ref}
-          id={selectId}
+          id={id ?? generatedId}
+          defaultValue=""
           className={clsx(
-            "rounded-brand border border-brand-gray/40 bg-brand-light px-4 py-3 font-body text-body text-brand-dark focus:border-brand-cyan focus:outline-none focus:ring-2 focus:ring-brand-cyan/40",
-            error && "border-red-500 focus:border-red-500 focus:ring-red-500/30",
+            "h-control-md w-full appearance-none rounded-md border bg-surface-card px-3 pr-9 font-body text-body text-text-body",
+            "transition-all duration-fast ease-standard focus-visible:outline-none focus-visible:shadow-focus-ring",
+            "disabled:cursor-not-allowed disabled:bg-surface-sunken",
+            invalid
+              ? "border-status-danger focus-visible:border-status-danger"
+              : "border-border-strong focus-visible:border-brand-cyan",
             className,
           )}
-          aria-invalid={error ? true : undefined}
-          aria-describedby={error ? errorId : undefined}
-          defaultValue=""
+          aria-invalid={invalid || undefined}
           {...props}
         >
           {placeholder && (
@@ -48,11 +47,9 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
             </option>
           ))}
         </select>
-        {error && (
-          <p id={errorId} role="alert" className="font-body text-small text-red-600">
-            {error}
-          </p>
-        )}
+        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-text-muted">
+          <ChevronDown size={16} />
+        </span>
       </div>
     );
   },

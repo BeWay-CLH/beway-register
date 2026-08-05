@@ -1,46 +1,41 @@
 import { forwardRef, useId, type InputHTMLAttributes } from "react";
 import { clsx } from "clsx";
+import type { LucideIcon } from "lucide-react";
 
 type InputProps = InputHTMLAttributes<HTMLInputElement> & {
-  label: string;
-  error?: string;
-  hint?: string;
+  /** Lucide icon shown inside the left edge. */
+  icon?: LucideIcon;
+  invalid?: boolean;
 };
 
+// Campo de texto de una línea — BeWay Design System > components/forms/Input.
+// Sin label/error propios: se envuelve en <Field> (ver components/ui/Field).
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, hint, className, id, ...props }, ref) => {
+  ({ icon: Icon, invalid = false, className, id, ...props }, ref) => {
     const generatedId = useId();
-    const inputId = id ?? generatedId;
-    const errorId = `${inputId}-error`;
-    const hintId = `${inputId}-hint`;
-
     return (
-      <div className="flex flex-col gap-1.5 text-left">
-        <label htmlFor={inputId} className="font-body text-small font-medium text-brand-dark">
-          {label}
-        </label>
+      <div className="relative w-full">
+        {Icon && (
+          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-text-muted">
+            <Icon size={16} />
+          </span>
+        )}
         <input
           ref={ref}
-          id={inputId}
+          id={id ?? generatedId}
           className={clsx(
-            "rounded-brand border border-brand-gray/40 bg-brand-light px-4 py-3 font-body text-body text-brand-dark placeholder:text-brand-gray focus:border-brand-cyan focus:outline-none focus:ring-2 focus:ring-brand-cyan/40",
-            error && "border-red-500 focus:border-red-500 focus:ring-red-500/30",
+            "h-control-md w-full rounded-md border bg-surface-card px-3 font-body text-body text-text-body placeholder:text-text-muted",
+            "transition-all duration-fast ease-standard focus-visible:outline-none focus-visible:shadow-focus-ring",
+            "disabled:cursor-not-allowed disabled:bg-surface-sunken",
+            Icon && "pl-9",
+            invalid
+              ? "border-status-danger focus-visible:border-status-danger"
+              : "border-border-strong focus-visible:border-brand-cyan",
             className,
           )}
-          aria-invalid={error ? true : undefined}
-          aria-describedby={error ? errorId : hint ? hintId : undefined}
+          aria-invalid={invalid || undefined}
           {...props}
         />
-        {hint && !error && (
-          <p id={hintId} className="font-body text-small text-brand-gray">
-            {hint}
-          </p>
-        )}
-        {error && (
-          <p id={errorId} role="alert" className="font-body text-small text-red-600">
-            {error}
-          </p>
-        )}
       </div>
     );
   },

@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { verifyTurnstileToken } from "@/lib/turnstile";
 import { getRequestIp, ipRateLimit } from "@/lib/rate-limit";
+import { sendPreRegistrationEmail } from "@/lib/resend";
 import { registroSchema, type RegistroInput } from "@/lib/validations/registro";
 
 export type RegisterAccountResult =
@@ -102,6 +103,10 @@ export async function registerAccount(
         "Tu cuenta se creó pero no pudimos guardar tu perfil. Escríbenos a team@clhglobal.org con tu correo para resolverlo.",
     };
   }
+
+  // Correo propio de BeWay (distinto del enlace de confirmación de Supabase
+  // Auth) — nunca bloquea el registro si Resend falla.
+  await sendPreRegistrationEmail(data.email, data.fullName);
 
   if (!signUpData.session) {
     return { status: "confirm_email", email: data.email };

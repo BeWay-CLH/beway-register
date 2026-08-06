@@ -35,17 +35,17 @@ export function WizardChrome({ progress, children }: WizardChromeProps) {
         </div>
         <nav aria-label="Etapas del CV Vivo">
           <ol className="flex flex-col gap-1">
-            {progress.stages.map(({ stage, isComplete }) => {
-              const isActive = stage.slug === currentSlug;
+            {progress.stages.map(({ slug, order, label, implemented, isComplete }) => {
+              const isActive = slug === currentSlug;
               return (
-                <li key={stage.slug}>
+                <li key={slug}>
                   <Link
-                    href={`/cv-vivo/${stage.slug}`}
+                    href={`/cv-vivo/${slug}`}
                     className={clsx(
                       "flex items-center gap-3 rounded-md px-3 py-2 font-body text-small transition-colors duration-fast ease-standard",
                       isActive
                         ? "bg-surface-accent-subtle font-semibold text-text-body"
-                        : stage.implemented
+                        : implemented
                           ? "text-text-body hover:bg-surface-sunken"
                           : "text-text-muted hover:bg-surface-sunken",
                     )}
@@ -58,9 +58,9 @@ export function WizardChrome({ progress, children }: WizardChromeProps) {
                           : "border-border-strong text-text-muted",
                       )}
                     >
-                      {isComplete ? <Check size={12} strokeWidth={3} /> : stage.order - 1}
+                      {isComplete ? <Check size={12} strokeWidth={3} /> : order - 1}
                     </span>
-                    {stage.label}
+                    {label}
                   </Link>
                 </li>
               );

@@ -1,7 +1,13 @@
-import { WIZARD_STAGES, type ProfileRow, type WizardStage } from "@/lib/cv-vivo/stages";
+import { WIZARD_STAGES, type ProfileRow } from "@/lib/cv-vivo/stages";
 
+// Forma plana y serializable — nunca incluye WizardStage.isComplete (una
+// función). WizardChrome es "use client": un Server Component no puede
+// pasarle una función como prop, solo datos.
 export type StageProgress = {
-  stage: WizardStage;
+  slug: string;
+  order: number;
+  label: string;
+  implemented: boolean;
   isComplete: boolean;
 };
 
@@ -19,8 +25,11 @@ export type WizardProgress = {
 // usuario realmente llena una etapa (o cuando el equipo publica una etapa
 // nueva y el usuario la completa), nunca por cambios de código.
 export function getWizardProgress(profile: ProfileRow): WizardProgress {
-  const stages = WIZARD_STAGES.map((stage) => ({
-    stage,
+  const stages: StageProgress[] = WIZARD_STAGES.map((stage) => ({
+    slug: stage.slug,
+    order: stage.order,
+    label: stage.label,
+    implemented: stage.implemented,
     isComplete: stage.isComplete(profile),
   }));
 
@@ -34,12 +43,6 @@ export function getWizardProgress(profile: ProfileRow): WizardProgress {
     completedCount,
     totalCount,
     percent,
-    nextIncompleteSlug: nextIncomplete?.stage.slug ?? null,
+    nextIncompleteSlug: nextIncomplete?.slug ?? null,
   };
-}
-
-export function getNextStageSlug(currentSlug: string): string | null {
-  const index = WIZARD_STAGES.findIndex((s) => s.slug === currentSlug);
-  if (index === -1 || index === WIZARD_STAGES.length - 1) return null;
-  return WIZARD_STAGES[index + 1].slug;
 }

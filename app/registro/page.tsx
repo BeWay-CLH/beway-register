@@ -10,8 +10,13 @@ const BENEFITS = [
   "Guardas tu progreso y lo completas cuando quieras",
 ];
 
-export default async function RegistroPage() {
-  const [countries, universities, studyFields, referralSources] = await Promise.all([
+type RegistroPageProps = {
+  searchParams: Promise<{ error?: string }>;
+};
+
+export default async function RegistroPage({ searchParams }: RegistroPageProps) {
+  const [{ error }, countries, universities, studyFields, referralSources] = await Promise.all([
+    searchParams,
     getCatalog("countries"),
     getCatalog("universities"),
     getCatalog("study_fields"),
@@ -42,7 +47,15 @@ export default async function RegistroPage() {
         </ul>
       </div>
 
-      <div className="flex flex-1 items-start justify-center px-6 py-12 md:px-16 md:py-24">
+      <div className="flex flex-1 flex-col items-center gap-4 px-6 py-12 md:px-16 md:py-24">
+        {error === "confirmation_failed" && (
+          <p
+            role="alert"
+            className="w-full max-w-md rounded-md border border-status-danger/40 bg-status-danger/10 px-4 py-3 text-center font-body text-small text-status-danger"
+          >
+            Tu enlace de confirmación expiró o ya se usó. Vuelve a crear tu cuenta para recibir uno nuevo.
+          </p>
+        )}
         <RegistroForm
           countries={countries.map((c) => ({ value: c.id, label: c.name }))}
           universities={universities.map((u) => ({ value: u.id, label: u.name }))}

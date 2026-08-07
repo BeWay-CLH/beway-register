@@ -28,10 +28,18 @@ export const getWizardContext = cache(async (): Promise<WizardContext | null> =>
   if (!profile) return null;
 
   const supabase = await createClient();
-  const [{ count: educationCount }, { count: experienceCount }, { count: projectsCount }] = await Promise.all([
+  const [
+    { count: educationCount },
+    { count: experienceCount },
+    { count: projectsCount },
+    { count: skillsCount },
+    { count: languagesCount },
+  ] = await Promise.all([
     supabase.from("education").select("*", { count: "exact", head: true }).eq("profile_id", profile.id),
     supabase.from("experiences").select("*", { count: "exact", head: true }).eq("profile_id", profile.id),
     supabase.from("projects").select("*", { count: "exact", head: true }).eq("profile_id", profile.id),
+    supabase.from("skills").select("*", { count: "exact", head: true }).eq("profile_id", profile.id),
+    supabase.from("languages").select("*", { count: "exact", head: true }).eq("profile_id", profile.id),
   ]);
 
   return {
@@ -39,5 +47,7 @@ export const getWizardContext = cache(async (): Promise<WizardContext | null> =>
     hasEducation: (educationCount ?? 0) > 0,
     hasExperience: (experienceCount ?? 0) > 0,
     hasProjects: (projectsCount ?? 0) > 0,
+    hasSkills: (skillsCount ?? 0) > 0,
+    hasLanguages: (languagesCount ?? 0) > 0,
   };
 });

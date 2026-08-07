@@ -11,6 +11,8 @@ export type WizardContext = {
   hasEducation: boolean;
   hasExperience: boolean;
   hasProjects: boolean;
+  hasSkills: boolean;
+  hasLanguages: boolean;
 };
 
 export type WizardStage = {
@@ -74,8 +76,8 @@ export const WIZARD_STAGES: WizardStage[] = [
     order: 7,
     label: "Habilidades e idiomas",
     description: "Tus habilidades e idiomas.",
-    implemented: false,
-    isComplete: () => false,
+    implemented: true,
+    isComplete: (ctx) => ctx.hasSkills && ctx.hasLanguages,
   },
   {
     slug: "certificaciones",

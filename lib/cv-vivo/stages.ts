@@ -10,6 +10,7 @@ export type WizardContext = {
   profile: ProfileRow;
   hasEducation: boolean;
   hasExperience: boolean;
+  hasProjects: boolean;
 };
 
 export type WizardStage = {
@@ -65,8 +66,8 @@ export const WIZARD_STAGES: WizardStage[] = [
     order: 6,
     label: "Proyectos y actividades",
     description: "Hasta 3 proyectos o actividades.",
-    implemented: false,
-    isComplete: () => false,
+    implemented: true,
+    isComplete: (ctx) => ctx.hasProjects,
   },
   {
     slug: "habilidades",

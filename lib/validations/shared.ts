@@ -15,3 +15,16 @@ export function optionalText(max: number, message?: string) {
     .nullable()
     .transform((value) => (value && value.length > 0 ? value : null));
 }
+
+// Enlace opcional: mismo trato de vacío/null que optionalText, más
+// validación de formato (debe incluir el protocolo). Se aplica sobre el
+// valor YA normalizado, así que null pasa el refine sin tocar el regex.
+export function optionalUrl(max: number, invalidMessage = "Incluye el enlace completo (con https://).") {
+  return z
+    .string()
+    .trim()
+    .max(max, "Enlace demasiado largo.")
+    .nullable()
+    .transform((value) => (value && value.length > 0 ? value : null))
+    .refine((value) => value === null || /^https?:\/\/.+/i.test(value), { message: invalidMessage });
+}

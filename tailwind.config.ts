@@ -48,6 +48,9 @@ const config: Config = {
         "status-warning": "var(--status-warning)",
         "status-danger": "var(--status-danger)",
         "status-info": "var(--status-info)",
+        link: "var(--link)",
+        "link-hover": "var(--link-hover)",
+        "link-on-inverse": "var(--link-on-inverse)",
       },
       backgroundImage: {
         "brand-gradient": "var(--brand-gradient)",

@@ -9,6 +9,7 @@ export type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
 export type WizardContext = {
   profile: ProfileRow;
   hasEducation: boolean;
+  hasExperience: boolean;
 };
 
 export type WizardStage = {
@@ -56,8 +57,8 @@ export const WIZARD_STAGES: WizardStage[] = [
     order: 5,
     label: "Experiencia",
     description: "Hasta 3 experiencias laborales.",
-    implemented: false,
-    isComplete: () => false,
+    implemented: true,
+    isComplete: (ctx) => ctx.hasExperience,
   },
   {
     slug: "proyectos",

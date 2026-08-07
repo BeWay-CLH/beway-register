@@ -14,6 +14,7 @@ export type WizardContext = {
   hasSkills: boolean;
   hasLanguages: boolean;
   hasCertifications: boolean;
+  hasPreferences: boolean;
 };
 
 export type WizardStage = {
@@ -93,8 +94,8 @@ export const WIZARD_STAGES: WizardStage[] = [
     order: 9,
     label: "Preferencias profesionales",
     description: "Qué tipo de oportunidades buscas.",
-    implemented: false,
-    isComplete: () => false,
+    implemented: true,
+    isComplete: (ctx) => ctx.hasPreferences,
   },
   {
     slug: "evidencias",

@@ -35,6 +35,7 @@ export const getWizardContext = cache(async (): Promise<WizardContext | null> =>
     { count: skillsCount },
     { count: languagesCount },
     { count: certificationsCount },
+    { data: preferences },
   ] = await Promise.all([
     supabase.from("education").select("*", { count: "exact", head: true }).eq("profile_id", profile.id),
     supabase.from("experiences").select("*", { count: "exact", head: true }).eq("profile_id", profile.id),
@@ -42,6 +43,7 @@ export const getWizardContext = cache(async (): Promise<WizardContext | null> =>
     supabase.from("skills").select("*", { count: "exact", head: true }).eq("profile_id", profile.id),
     supabase.from("languages").select("*", { count: "exact", head: true }).eq("profile_id", profile.id),
     supabase.from("certifications").select("*", { count: "exact", head: true }).eq("profile_id", profile.id),
+    supabase.from("preferences").select("availability_option_id").eq("profile_id", profile.id).maybeSingle(),
   ]);
 
   return {
@@ -52,5 +54,6 @@ export const getWizardContext = cache(async (): Promise<WizardContext | null> =>
     hasSkills: (skillsCount ?? 0) > 0,
     hasLanguages: (languagesCount ?? 0) > 0,
     hasCertifications: (certificationsCount ?? 0) > 0,
+    hasPreferences: preferences?.availability_option_id != null,
   };
 });

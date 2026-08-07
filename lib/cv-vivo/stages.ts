@@ -15,6 +15,7 @@ export type WizardContext = {
   hasLanguages: boolean;
   hasCertifications: boolean;
   hasPreferences: boolean;
+  hasEvidences: boolean;
 };
 
 export type WizardStage = {
@@ -102,8 +103,8 @@ export const WIZARD_STAGES: WizardStage[] = [
     order: 10,
     label: "Evidencias",
     description: "Enlaces a tu portafolio, GitHub u otros.",
-    implemented: false,
-    isComplete: () => false,
+    implemented: true,
+    isComplete: (ctx) => ctx.hasEvidences,
   },
   {
     slug: "privacidad",

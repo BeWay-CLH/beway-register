@@ -13,6 +13,7 @@ export type WizardContext = {
   hasProjects: boolean;
   hasSkills: boolean;
   hasLanguages: boolean;
+  hasCertifications: boolean;
 };
 
 export type WizardStage = {
@@ -84,8 +85,8 @@ export const WIZARD_STAGES: WizardStage[] = [
     order: 8,
     label: "Formación complementaria",
     description: "Hasta 3 cursos, certificaciones o talleres.",
-    implemented: false,
-    isComplete: () => false,
+    implemented: true,
+    isComplete: (ctx) => ctx.hasCertifications,
   },
   {
     slug: "preferencias",

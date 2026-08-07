@@ -34,12 +34,14 @@ export const getWizardContext = cache(async (): Promise<WizardContext | null> =>
     { count: projectsCount },
     { count: skillsCount },
     { count: languagesCount },
+    { count: certificationsCount },
   ] = await Promise.all([
     supabase.from("education").select("*", { count: "exact", head: true }).eq("profile_id", profile.id),
     supabase.from("experiences").select("*", { count: "exact", head: true }).eq("profile_id", profile.id),
     supabase.from("projects").select("*", { count: "exact", head: true }).eq("profile_id", profile.id),
     supabase.from("skills").select("*", { count: "exact", head: true }).eq("profile_id", profile.id),
     supabase.from("languages").select("*", { count: "exact", head: true }).eq("profile_id", profile.id),
+    supabase.from("certifications").select("*", { count: "exact", head: true }).eq("profile_id", profile.id),
   ]);
 
   return {
@@ -49,5 +51,6 @@ export const getWizardContext = cache(async (): Promise<WizardContext | null> =>
     hasProjects: (projectsCount ?? 0) > 0,
     hasSkills: (skillsCount ?? 0) > 0,
     hasLanguages: (languagesCount ?? 0) > 0,
+    hasCertifications: (certificationsCount ?? 0) > 0,
   };
 });

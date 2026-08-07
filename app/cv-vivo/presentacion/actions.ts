@@ -1,29 +1,12 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
-import { getRequestIp, ipRateLimit, userRateLimit } from "@/lib/rate-limit";
+import { requireUser, type SaveStageResult } from "@/lib/cv-vivo/require-user";
 import { presentacionSchema, type PresentacionInput } from "@/lib/validations/cv-vivo/presentacion";
 
-export type SaveStageResult = { status: "success" } | { status: "error"; message: string };
-
 export async function savePresentacion(input: PresentacionInput): Promise<SaveStageResult> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return { status: "error", message: "Tu sesión expiró. Vuelve a iniciar sesión." };
-  }
-
-  const ip = await getRequestIp();
-  const [{ success: ipOk }, { success: userOk }] = await Promise.all([
-    ipRateLimit.limit(ip),
-    userRateLimit.limit(user.id),
-  ]);
-  if (!ipOk || !userOk) {
-    return { status: "error", message: "Demasiados intentos. Espera un minuto y vuelve a intentarlo." };
-  }
+  const auth = await requireUser();
+  if (!auth.ok) return { status: "error", message: auth.message };
+  const { supabase, userId } = auth;
 
   const parsed = presentacionSchema.safeParse(input);
   if (!parsed.success) {
@@ -36,7 +19,7 @@ export async function savePresentacion(input: PresentacionInput): Promise<SaveSt
       headline: parsed.data.headline,
       bio: parsed.data.bio,
     })
-    .eq("id", user.id);
+    .eq("id", userId);
 
   if (error) {
     return { status: "error", message: "No se pudo guardar. Intenta de nuevo." };

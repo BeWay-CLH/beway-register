@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getCurrentProfile } from "@/lib/cv-vivo/get-current-profile";
+import { getWizardContext } from "@/lib/cv-vivo/get-current-profile";
 import { getWizardProgress } from "@/lib/cv-vivo/progress";
 import { WizardChrome } from "@/components/cv-vivo/WizardChrome";
 
@@ -9,13 +9,13 @@ import { WizardChrome } from "@/components/cv-vivo/WizardChrome";
 // entrada de auth es /registro (crea la cuenta y, si no requiere
 // confirmación de email, ya deja sesión iniciada).
 export default async function CvVivoLayout({ children }: { children: React.ReactNode }) {
-  const profile = await getCurrentProfile();
+  const context = await getWizardContext();
 
-  if (!profile) {
+  if (!context) {
     redirect("/registro");
   }
 
-  const progress = getWizardProgress(profile);
+  const progress = getWizardProgress(context);
 
   return <WizardChrome progress={progress}>{children}</WizardChrome>;
 }

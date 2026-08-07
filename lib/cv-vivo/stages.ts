@@ -2,6 +2,15 @@ import type { Database } from "@/lib/supabase/database.types";
 
 export type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
 
+// Contexto para calcular completitud. profiles alcanza para las etapas 2-3,
+// pero desde la etapa 4 la completitud depende de tablas hijas (education,
+// experiences, etc.) — cada una agrega su propia señal aquí cuando se
+// implementa, en vez de rediseñar esto de una vez para las 10 etapas.
+export type WizardContext = {
+  profile: ProfileRow;
+  hasEducation: boolean;
+};
+
 export type WizardStage = {
   slug: string;
   order: number;
@@ -9,7 +18,7 @@ export type WizardStage = {
   description: string;
   /** false = ruta ya existe (aparece en el stepper) pero aún es un stub. */
   implemented: boolean;
-  isComplete: (profile: ProfileRow) => boolean;
+  isComplete: (ctx: WizardContext) => boolean;
 };
 
 // Etapas 2-11 del CV Vivo (CLAUDE.md > Modelo de datos). El Paso 1
@@ -24,7 +33,7 @@ export const WIZARD_STAGES: WizardStage[] = [
     label: "Información personal",
     description: "Tu teléfono y situación académica actual.",
     implemented: true,
-    isComplete: (profile) => profile.academic_status_id !== null,
+    isComplete: (ctx) => ctx.profile.academic_status_id !== null,
   },
   {
     slug: "presentacion",
@@ -32,15 +41,15 @@ export const WIZARD_STAGES: WizardStage[] = [
     label: "Presentación",
     description: "Un titular y una breve descripción de ti.",
     implemented: true,
-    isComplete: (profile) => Boolean(profile.headline),
+    isComplete: (ctx) => Boolean(ctx.profile.headline),
   },
   {
     slug: "educacion",
     order: 4,
     label: "Educación",
     description: "Tu formación académica.",
-    implemented: false,
-    isComplete: () => false,
+    implemented: true,
+    isComplete: (ctx) => ctx.hasEducation,
   },
   {
     slug: "experiencia",

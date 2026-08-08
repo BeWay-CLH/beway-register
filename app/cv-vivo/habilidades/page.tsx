@@ -34,7 +34,8 @@ export default async function HabilidadesPage() {
       <div>
         <h1 className="font-heading text-h1 text-brand-dark">Habilidades e idiomas</h1>
         <p className="mt-2 font-body text-body text-text-muted">
-          Agrega tus habilidades y los idiomas que manejas, sin límite de cantidad.
+          Así las empresas encuentran tu perfil cuando buscan por habilidad o idioma. Sin límite
+          de cantidad.
         </p>
       </div>
       <HabilidadesForm

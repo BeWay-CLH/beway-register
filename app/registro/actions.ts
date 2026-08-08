@@ -90,6 +90,13 @@ export async function registerAccount(
     // `profiles` (no hay trigger sobre auth.users, así que esta segunda
     // escritura es la única forma de que el perfil exista).
     ({ error: profileError } = await insertProfile());
+
+    // 23505 = unique_violation en `id`: el primer intento sí se aplicó
+    // (solo se perdió la respuesta por un problema de red) y este segundo
+    // insert chocó con la fila que ya existe — no es un fallo real.
+    if (profileError?.code === "23505") {
+      profileError = null;
+    }
   }
 
   if (profileError) {

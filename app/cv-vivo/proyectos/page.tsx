@@ -39,7 +39,8 @@ export default async function ProyectosPage() {
       <div>
         <h1 className="font-heading text-h1 text-brand-dark">Proyectos y actividades</h1>
         <p className="mt-2 font-body text-body text-text-muted">
-          Hasta 3 proyectos, actividades extracurriculares o hackathons.
+          Destaca lo que has construido fuera del salón de clases. Hasta 3 proyectos, actividades
+          extracurriculares o hackathons.
         </p>
       </div>
       <ProyectosForm entries={entries} projectTypes={projectTypes.map((t) => ({ value: t.id, label: t.name }))} />

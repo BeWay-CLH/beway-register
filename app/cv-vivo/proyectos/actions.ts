@@ -1,9 +1,8 @@
 "use server";
 
 import { requireUser, type SaveStageResult } from "@/lib/cv-vivo/require-user";
+import { MAX_REPEATABLE_ENTRIES } from "@/lib/cv-vivo/limits";
 import { projectEntrySchema, type ProjectEntryInput } from "@/lib/validations/cv-vivo/proyectos";
-
-const MAX_PROJECTS = 3;
 
 export async function saveProjectEntry(input: ProjectEntryInput): Promise<SaveStageResult> {
   const auth = await requireUser();
@@ -49,7 +48,7 @@ export async function saveProjectEntry(input: ProjectEntryInput): Promise<SaveSt
 
   if (error) {
     if (error.code === "23514") {
-      return { status: "error", message: `Ya alcanzaste el máximo de ${MAX_PROJECTS} proyectos.` };
+      return { status: "error", message: `Ya alcanzaste el máximo de ${MAX_REPEATABLE_ENTRIES} proyectos.` };
     }
     return { status: "error", message: "No se pudo guardar. Intenta de nuevo." };
   }

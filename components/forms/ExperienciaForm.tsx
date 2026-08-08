@@ -8,6 +8,7 @@ import type { z } from "zod";
 import { Plus, Pencil, Trash2, ArrowRight } from "lucide-react";
 import { experienceEntrySchema, type ExperienceEntryInput } from "@/lib/validations/cv-vivo/experiencia";
 import { saveExperienceEntry, deleteExperienceEntry } from "@/app/cv-vivo/experiencia/actions";
+import { MAX_REPEATABLE_ENTRIES } from "@/lib/cv-vivo/limits";
 import { Card } from "@/components/ui/Card";
 import { Field } from "@/components/ui/Field";
 import { Input } from "@/components/ui/Input";
@@ -15,8 +16,6 @@ import { Select, type SelectOption } from "@/components/ui/Select";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { Textarea } from "@/components/ui/Textarea";
 import { Button } from "@/components/ui/Button";
-
-const MAX_EXPERIENCES = 3;
 
 export type ExperienceEntry = {
   id: string;
@@ -43,7 +42,7 @@ export function ExperienciaForm({ entries, experienceTypes, sectors }: Experienc
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const editingEntry = editingId && editingId !== "new" ? entries.find((e) => e.id === editingId) ?? null : null;
-  const atLimit = entries.length >= MAX_EXPERIENCES;
+  const atLimit = entries.length >= MAX_REPEATABLE_ENTRIES;
 
   function handleDelete(id: string) {
     if (!window.confirm("¿Eliminar esta experiencia de tu CV Vivo?")) return;
@@ -95,7 +94,7 @@ export function ExperienciaForm({ entries, experienceTypes, sectors }: Experienc
         />
       ) : atLimit ? (
         <p className="text-center font-body text-small text-text-muted">
-          Ya agregaste el máximo de {MAX_EXPERIENCES} experiencias.
+          Ya agregaste el máximo de {MAX_REPEATABLE_ENTRIES} experiencias.
         </p>
       ) : (
         <Button variant="outline" icon={Plus} onClick={() => setEditingId("new")}>

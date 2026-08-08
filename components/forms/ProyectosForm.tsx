@@ -8,14 +8,13 @@ import type { z } from "zod";
 import { Plus, Pencil, Trash2, ArrowRight, ExternalLink } from "lucide-react";
 import { projectEntrySchema, type ProjectEntryInput } from "@/lib/validations/cv-vivo/proyectos";
 import { saveProjectEntry, deleteProjectEntry } from "@/app/cv-vivo/proyectos/actions";
+import { MAX_REPEATABLE_ENTRIES } from "@/lib/cv-vivo/limits";
 import { Card } from "@/components/ui/Card";
 import { Field } from "@/components/ui/Field";
 import { Input } from "@/components/ui/Input";
 import { Select, type SelectOption } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
 import { Button } from "@/components/ui/Button";
-
-const MAX_PROJECTS = 3;
 
 export type ProjectEntry = {
   id: string;
@@ -39,7 +38,7 @@ export function ProyectosForm({ entries, projectTypes }: ProyectosFormProps) {
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const editingEntry = editingId && editingId !== "new" ? entries.find((e) => e.id === editingId) ?? null : null;
-  const atLimit = entries.length >= MAX_PROJECTS;
+  const atLimit = entries.length >= MAX_REPEATABLE_ENTRIES;
 
   function handleDelete(id: string) {
     if (!window.confirm("¿Eliminar este proyecto de tu CV Vivo?")) return;
@@ -91,7 +90,7 @@ export function ProyectosForm({ entries, projectTypes }: ProyectosFormProps) {
         />
       ) : atLimit ? (
         <p className="text-center font-body text-small text-text-muted">
-          Ya agregaste el máximo de {MAX_PROJECTS} proyectos.
+          Ya agregaste el máximo de {MAX_REPEATABLE_ENTRIES} proyectos.
         </p>
       ) : (
         <Button variant="outline" icon={Plus} onClick={() => setEditingId("new")}>

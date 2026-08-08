@@ -80,8 +80,6 @@ const config: Config = {
         lg: "var(--radius-lg)",
         xl: "var(--radius-xl)",
         pill: "var(--radius-pill)",
-        brand: "var(--radius-brand)",
-        "brand-card": "16px",
       },
       boxShadow: {
         xs: "var(--shadow-xs)",
@@ -90,7 +88,6 @@ const config: Config = {
         lg: "var(--shadow-lg)",
         glow: "var(--shadow-glow)",
         "focus-ring": "var(--ring-focus)",
-        brand: "var(--shadow-brand)",
       },
       transitionDuration: {
         fast: "120ms",

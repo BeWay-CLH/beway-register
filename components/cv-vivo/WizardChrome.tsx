@@ -52,7 +52,7 @@ export function WizardChrome({ progress, children }: WizardChromeProps) {
                   >
                     <span
                       className={clsx(
-                        "flex h-5 w-5 shrink-0 items-center justify-center rounded-pill border font-body text-[11px]",
+                        "flex h-5 w-5 shrink-0 items-center justify-center rounded-pill border font-body text-xs",
                         isComplete
                           ? "border-brand-cyan bg-brand-cyan text-brand-dark"
                           : "border-border-strong text-text-muted",

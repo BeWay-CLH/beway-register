@@ -1,9 +1,8 @@
 "use server";
 
 import { requireUser, type SaveStageResult } from "@/lib/cv-vivo/require-user";
+import { MAX_REPEATABLE_ENTRIES } from "@/lib/cv-vivo/limits";
 import { certificationEntrySchema, type CertificationEntryInput } from "@/lib/validations/cv-vivo/certificaciones";
-
-const MAX_CERTIFICATIONS = 3;
 
 export async function saveCertificationEntry(input: CertificationEntryInput): Promise<SaveStageResult> {
   const auth = await requireUser();
@@ -47,7 +46,7 @@ export async function saveCertificationEntry(input: CertificationEntryInput): Pr
 
   if (error) {
     if (error.code === "23514") {
-      return { status: "error", message: `Ya alcanzaste el máximo de ${MAX_CERTIFICATIONS} certificaciones.` };
+      return { status: "error", message: `Ya alcanzaste el máximo de ${MAX_REPEATABLE_ENTRIES} certificaciones.` };
     }
     return { status: "error", message: "No se pudo guardar. Intenta de nuevo." };
   }

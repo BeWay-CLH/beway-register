@@ -43,7 +43,8 @@ export default async function EducacionPage() {
       <div>
         <h1 className="font-heading text-h1 text-brand-dark">Educación</h1>
         <p className="mt-2 font-body text-body text-text-muted">
-          Tu formación académica — puedes agregar más de una.
+          Ayuda a las empresas a entender tu formación y en qué etapa académica estás. Puedes
+          agregar más de una institución.
         </p>
       </div>
       <EducacionForm

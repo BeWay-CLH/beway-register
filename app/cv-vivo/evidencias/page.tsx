@@ -31,7 +31,8 @@ export default async function EvidenciasPage() {
       <div>
         <h1 className="font-heading text-h1 text-brand-dark">Evidencias</h1>
         <p className="mt-2 font-body text-body text-text-muted">
-          Enlaces a tu portafolio, GitHub, LinkedIn u otros trabajos.
+          Enlaces donde las empresas puedan ver tu trabajo real: portafolio, GitHub, LinkedIn u
+          otros.
         </p>
       </div>
       <EvidenciasForm entries={entries} />

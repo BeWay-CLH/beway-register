@@ -11,13 +11,12 @@ import {
   type CertificationEntryInput,
 } from "@/lib/validations/cv-vivo/certificaciones";
 import { saveCertificationEntry, deleteCertificationEntry } from "@/app/cv-vivo/certificaciones/actions";
+import { MAX_REPEATABLE_ENTRIES } from "@/lib/cv-vivo/limits";
 import { Card } from "@/components/ui/Card";
 import { Field } from "@/components/ui/Field";
 import { Input } from "@/components/ui/Input";
 import { Select, type SelectOption } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
-
-const MAX_CERTIFICATIONS = 3;
 
 export type CertificationEntry = {
   id: string;
@@ -40,7 +39,7 @@ export function CertificacionesForm({ entries, certificationTypes }: Certificaci
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const editingEntry = editingId && editingId !== "new" ? entries.find((e) => e.id === editingId) ?? null : null;
-  const atLimit = entries.length >= MAX_CERTIFICATIONS;
+  const atLimit = entries.length >= MAX_REPEATABLE_ENTRIES;
 
   function handleDelete(id: string) {
     if (!window.confirm("¿Eliminar esta certificación de tu CV Vivo?")) return;
@@ -92,7 +91,7 @@ export function CertificacionesForm({ entries, certificationTypes }: Certificaci
         />
       ) : atLimit ? (
         <p className="text-center font-body text-small text-text-muted">
-          Ya agregaste el máximo de {MAX_CERTIFICATIONS} certificaciones.
+          Ya agregaste el máximo de {MAX_REPEATABLE_ENTRIES} certificaciones.
         </p>
       ) : (
         <Button variant="outline" icon={Plus} onClick={() => setEditingId("new")}>

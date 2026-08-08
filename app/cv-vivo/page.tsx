@@ -10,5 +10,5 @@ export default async function CvVivoIndexPage() {
   if (!context) redirect("/registro");
 
   const progress = getWizardProgress(context);
-  redirect(`/cv-vivo/${progress.nextIncompleteSlug ?? "personal"}`);
+  redirect(`/cv-vivo/${progress.nextIncompleteSlug}`);
 }

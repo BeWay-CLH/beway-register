@@ -42,7 +42,8 @@ export default async function ExperienciaPage() {
       <div>
         <h1 className="font-heading text-h1 text-brand-dark">Experiencia</h1>
         <p className="mt-2 font-body text-body text-text-muted">
-          Hasta 3 experiencias laborales, prácticas o freelance.
+          Muestra a las empresas el tipo de trabajo que ya has hecho, aunque sea poco. Hasta 3
+          experiencias laborales, prácticas o freelance.
         </p>
       </div>
       <ExperienciaForm

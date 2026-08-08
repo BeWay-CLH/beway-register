@@ -1,9 +1,8 @@
 "use server";
 
 import { requireUser, type SaveStageResult } from "@/lib/cv-vivo/require-user";
+import { MAX_REPEATABLE_ENTRIES } from "@/lib/cv-vivo/limits";
 import { experienceEntrySchema, type ExperienceEntryInput } from "@/lib/validations/cv-vivo/experiencia";
-
-const MAX_EXPERIENCES = 3;
 
 // Server Actions de la etapa 5. El formulario ya oculta "agregar" al llegar
 // a 3 entradas, pero el trigger de Postgres (enforce_max_entries_per_profile)
@@ -59,7 +58,7 @@ export async function saveExperienceEntry(input: ExperienceEntryInput): Promise<
 
   if (error) {
     if (error.code === "23514") {
-      return { status: "error", message: `Ya alcanzaste el máximo de ${MAX_EXPERIENCES} experiencias.` };
+      return { status: "error", message: `Ya alcanzaste el máximo de ${MAX_REPEATABLE_ENTRIES} experiencias.` };
     }
     return { status: "error", message: "No se pudo guardar. Intenta de nuevo." };
   }

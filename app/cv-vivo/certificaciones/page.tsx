@@ -38,7 +38,8 @@ export default async function CertificacionesPage() {
       <div>
         <h1 className="font-heading text-h1 text-brand-dark">Formación complementaria</h1>
         <p className="mt-2 font-body text-body text-text-muted">
-          Hasta 3 cursos, certificaciones, bootcamps o talleres.
+          Suma valor a tu perfil con formación adicional. Hasta 3 cursos, certificaciones,
+          bootcamps o talleres.
         </p>
       </div>
       <CertificacionesForm

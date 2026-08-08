@@ -71,10 +71,33 @@ export async function deleteEducationEntry(id: string): Promise<SaveStageResult>
   if (!auth.ok) return { status: "error", message: auth.message };
   const { supabase, userId } = auth;
 
-  const { error } = await supabase.from("education").delete().eq("id", id).eq("profile_id", userId);
+  const { data: deleted, error } = await supabase
+    .from("education")
+    .delete()
+    .eq("id", id)
+    .eq("profile_id", userId)
+    .select("is_primary")
+    .maybeSingle();
 
   if (error) {
     return { status: "error", message: "No se pudo eliminar. Intenta de nuevo." };
   }
+
+  // Si se eliminó la entrada principal, promueve otra (la más antigua que
+  // quede) — sin esto, el perfil se queda sin ninguna is_primary.
+  if (deleted?.is_primary) {
+    const { data: remaining } = await supabase
+      .from("education")
+      .select("id")
+      .eq("profile_id", userId)
+      .order("created_at", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+    if (remaining) {
+      await supabase.from("education").update({ is_primary: true }).eq("id", remaining.id).eq("profile_id", userId);
+    }
+  }
+
   return { status: "success" };
 }

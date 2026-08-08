@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/Input";
 import { Select, type SelectOption } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
 import { Button } from "@/components/ui/Button";
+import { LoadingRow } from "@/components/ui/LoadingRow";
 
 export type ProjectEntry = {
   id: string;
@@ -34,7 +35,10 @@ type ProyectosFormProps = {
 export function ProyectosForm({ entries, projectTypes }: ProyectosFormProps) {
   const router = useRouter();
   const [editingId, setEditingId] = useState<string | "new" | null>(entries.length === 0 ? "new" : null);
-  const [isDeleting, startDeleteTransition] = useTransition();
+  // Cubre tanto guardar como eliminar: vive en el padre para que siga
+  // visible mientras router.refresh() trae los datos reales, aunque el
+  // formulario hijo que lo disparó ya se haya desmontado.
+  const [isRefreshing, startRefresh] = useTransition();
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const editingEntry = editingId && editingId !== "new" ? entries.find((e) => e.id === editingId) ?? null : null;
@@ -43,13 +47,20 @@ export function ProyectosForm({ entries, projectTypes }: ProyectosFormProps) {
   function handleDelete(id: string) {
     if (!window.confirm("¿Eliminar este proyecto de tu CV Vivo?")) return;
     setDeleteError(null);
-    startDeleteTransition(async () => {
+    startRefresh(async () => {
       const result = await deleteProjectEntry(id);
       if (result.status === "error") {
         setDeleteError(result.message);
         return;
       }
       if (editingId === id) setEditingId(null);
+      router.refresh();
+    });
+  }
+
+  function handleSaved() {
+    setEditingId(null);
+    startRefresh(() => {
       router.refresh();
     });
   }
@@ -65,11 +76,13 @@ export function ProyectosForm({ entries, projectTypes }: ProyectosFormProps) {
               projectTypes={projectTypes}
               onEdit={() => setEditingId(entry.id)}
               onDelete={() => handleDelete(entry.id)}
-              disabled={isDeleting}
+              disabled={isRefreshing}
             />
           ))}
         </ul>
       )}
+
+      {isRefreshing && <LoadingRow />}
 
       {deleteError && (
         <p role="alert" className="font-body text-small text-status-danger">
@@ -82,10 +95,7 @@ export function ProyectosForm({ entries, projectTypes }: ProyectosFormProps) {
           key={editingId}
           entry={editingEntry}
           projectTypes={projectTypes}
-          onSaved={() => {
-            setEditingId(null);
-            router.refresh();
-          }}
+          onSaved={handleSaved}
           onCancel={entries.length === 0 ? undefined : () => setEditingId(null)}
         />
       ) : atLimit ? (
@@ -93,7 +103,7 @@ export function ProyectosForm({ entries, projectTypes }: ProyectosFormProps) {
           Ya agregaste el máximo de {MAX_REPEATABLE_ENTRIES} proyectos.
         </p>
       ) : (
-        <Button variant="outline" icon={Plus} onClick={() => setEditingId("new")}>
+        <Button variant="outline" icon={Plus} onClick={() => setEditingId("new")} disabled={isRefreshing}>
           Agregar otro proyecto
         </Button>
       )}
@@ -262,8 +272,8 @@ function EntryForm({
               Cancelar
             </Button>
           )}
-          <Button type="submit" fullWidth={!onCancel} disabled={isPending}>
-            {isPending ? "Guardando…" : "Guardar"}
+          <Button type="submit" fullWidth={!onCancel} loading={isPending}>
+            Guardar
           </Button>
         </div>
       </Card>

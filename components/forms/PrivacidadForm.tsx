@@ -73,8 +73,8 @@ export function PrivacidadForm({ defaultValues }: PrivacidadFormProps) {
         </p>
       )}
 
-      <Button type="submit" size="lg" fullWidth iconAfter={Check} disabled={isPending}>
-        {isPending ? "Guardando…" : "Guardar y terminar"}
+      <Button type="submit" size="lg" fullWidth iconAfter={Check} loading={isPending}>
+        Guardar y terminar
       </Button>
     </form>
   );

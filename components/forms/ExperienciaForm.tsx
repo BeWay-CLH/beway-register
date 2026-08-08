@@ -16,6 +16,7 @@ import { Select, type SelectOption } from "@/components/ui/Select";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { Textarea } from "@/components/ui/Textarea";
 import { Button } from "@/components/ui/Button";
+import { LoadingRow } from "@/components/ui/LoadingRow";
 
 export type ExperienceEntry = {
   id: string;
@@ -38,7 +39,10 @@ type ExperienciaFormProps = {
 export function ExperienciaForm({ entries, experienceTypes, sectors }: ExperienciaFormProps) {
   const router = useRouter();
   const [editingId, setEditingId] = useState<string | "new" | null>(entries.length === 0 ? "new" : null);
-  const [isDeleting, startDeleteTransition] = useTransition();
+  // Cubre tanto guardar como eliminar: vive en el padre para que siga
+  // visible mientras router.refresh() trae los datos reales, aunque el
+  // formulario hijo que lo disparó ya se haya desmontado.
+  const [isRefreshing, startRefresh] = useTransition();
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const editingEntry = editingId && editingId !== "new" ? entries.find((e) => e.id === editingId) ?? null : null;
@@ -47,13 +51,20 @@ export function ExperienciaForm({ entries, experienceTypes, sectors }: Experienc
   function handleDelete(id: string) {
     if (!window.confirm("¿Eliminar esta experiencia de tu CV Vivo?")) return;
     setDeleteError(null);
-    startDeleteTransition(async () => {
+    startRefresh(async () => {
       const result = await deleteExperienceEntry(id);
       if (result.status === "error") {
         setDeleteError(result.message);
         return;
       }
       if (editingId === id) setEditingId(null);
+      router.refresh();
+    });
+  }
+
+  function handleSaved() {
+    setEditingId(null);
+    startRefresh(() => {
       router.refresh();
     });
   }
@@ -68,11 +79,13 @@ export function ExperienciaForm({ entries, experienceTypes, sectors }: Experienc
               entry={entry}
               onEdit={() => setEditingId(entry.id)}
               onDelete={() => handleDelete(entry.id)}
-              disabled={isDeleting}
+              disabled={isRefreshing}
             />
           ))}
         </ul>
       )}
+
+      {isRefreshing && <LoadingRow />}
 
       {deleteError && (
         <p role="alert" className="font-body text-small text-status-danger">
@@ -86,10 +99,7 @@ export function ExperienciaForm({ entries, experienceTypes, sectors }: Experienc
           entry={editingEntry}
           experienceTypes={experienceTypes}
           sectors={sectors}
-          onSaved={() => {
-            setEditingId(null);
-            router.refresh();
-          }}
+          onSaved={handleSaved}
           onCancel={entries.length === 0 ? undefined : () => setEditingId(null)}
         />
       ) : atLimit ? (
@@ -97,7 +107,7 @@ export function ExperienciaForm({ entries, experienceTypes, sectors }: Experienc
           Ya agregaste el máximo de {MAX_REPEATABLE_ENTRIES} experiencias.
         </p>
       ) : (
-        <Button variant="outline" icon={Plus} onClick={() => setEditingId("new")}>
+        <Button variant="outline" icon={Plus} onClick={() => setEditingId("new")} disabled={isRefreshing}>
           Agregar otra experiencia
         </Button>
       )}
@@ -273,8 +283,8 @@ function EntryForm({
               Cancelar
             </Button>
           )}
-          <Button type="submit" fullWidth={!onCancel} disabled={isPending}>
-            {isPending ? "Guardando…" : "Guardar"}
+          <Button type="submit" fullWidth={!onCancel} loading={isPending}>
+            Guardar
           </Button>
         </div>
       </Card>

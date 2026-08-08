@@ -1,6 +1,6 @@
 import { forwardRef, type ButtonHTMLAttributes } from "react";
 import { clsx } from "clsx";
-import type { LucideIcon } from "lucide-react";
+import { Loader2, type LucideIcon } from "lucide-react";
 
 type ButtonVariant = "primary" | "secondary" | "outline" | "ghost" | "gradient";
 type ButtonSize = "sm" | "md" | "lg";
@@ -15,6 +15,11 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   fullWidth?: boolean;
   /** Recolours outline/ghost for dark navy surfaces. */
   onInverse?: boolean;
+  /** Ícono girando en vez de `icon`, y deshabilita el botón — para
+   * acciones que disparan una Server Action (guardar, eliminar). La
+   * latencia real hacia Supabase/Upstash no baja, pero un indicador
+   * visible de inmediato hace que la espera se sienta más corta. */
+  loading?: boolean;
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
@@ -49,6 +54,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       iconAfter: IconAfter,
       fullWidth = false,
       onInverse = false,
+      loading = false,
+      disabled,
       className,
       children,
       ...props
@@ -60,6 +67,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         type="button"
+        disabled={disabled || loading}
+        aria-busy={loading || undefined}
         className={clsx(
           "items-center justify-center rounded-md font-body font-semibold tracking-tight",
           "transition-all duration-fast ease-standard focus-visible:outline-none focus-visible:shadow-focus-ring",
@@ -72,9 +81,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         )}
         {...props}
       >
-        {Icon && <Icon size={iconSize} />}
+        {loading ? <Loader2 size={iconSize} className="animate-spin" /> : Icon && <Icon size={iconSize} />}
         {children}
-        {IconAfter && <IconAfter size={iconSize} />}
+        {!loading && IconAfter && <IconAfter size={iconSize} />}
       </button>
     );
   },

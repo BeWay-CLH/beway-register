@@ -216,7 +216,7 @@ export function RegistroForm({
           </p>
         )}
 
-        <Button type="submit" size="lg" fullWidth iconAfter={ArrowRight} disabled={isPending}>
+        <Button type="submit" size="lg" fullWidth iconAfter={ArrowRight} loading={isPending}>
           {isPending ? "Creando cuenta…" : "Crear mi perfil"}
         </Button>
       </form>

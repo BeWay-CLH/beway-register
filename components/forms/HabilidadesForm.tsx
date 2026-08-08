@@ -99,7 +99,7 @@ function SkillsSection({ skills, onChanged }: { skills: SkillItem[]; onChanged: 
         <div className="flex-1">
           <Input placeholder="Ej. Excel, Python, diseño…" invalid={!!errors.name} {...register("name")} />
         </div>
-        <Button type="submit" icon={Plus} disabled={isPending}>
+        <Button type="submit" icon={Plus} loading={isPending}>
           Agregar
         </Button>
       </form>
@@ -199,7 +199,7 @@ function LanguagesSection({
             {...register("proficiencyLevelId")}
           />
         </div>
-        <Button type="submit" icon={Plus} disabled={isPending}>
+        <Button type="submit" icon={Plus} loading={isPending}>
           Agregar
         </Button>
       </form>

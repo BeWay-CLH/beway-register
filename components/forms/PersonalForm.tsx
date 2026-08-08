@@ -71,8 +71,8 @@ export function PersonalForm({ academicStatuses, defaultValues }: PersonalFormPr
         </p>
       )}
 
-      <Button type="submit" size="lg" fullWidth iconAfter={ArrowRight} disabled={isPending}>
-        {isPending ? "Guardando…" : "Guardar y continuar"}
+      <Button type="submit" size="lg" fullWidth iconAfter={ArrowRight} loading={isPending}>
+        Guardar y continuar
       </Button>
     </form>
   );

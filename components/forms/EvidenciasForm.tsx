@@ -11,6 +11,7 @@ import { Card } from "@/components/ui/Card";
 import { Field } from "@/components/ui/Field";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
+import { LoadingRow } from "@/components/ui/LoadingRow";
 
 export type EvidenceEntry = {
   id: string;
@@ -25,7 +26,10 @@ type EvidenciasFormProps = {
 export function EvidenciasForm({ entries }: EvidenciasFormProps) {
   const router = useRouter();
   const [editingId, setEditingId] = useState<string | "new" | null>(entries.length === 0 ? "new" : null);
-  const [isDeleting, startDeleteTransition] = useTransition();
+  // Cubre tanto guardar como eliminar: vive en el padre para que siga
+  // visible mientras router.refresh() trae los datos reales, aunque el
+  // formulario hijo que lo disparó ya se haya desmontado.
+  const [isRefreshing, startRefresh] = useTransition();
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const editingEntry = editingId && editingId !== "new" ? entries.find((e) => e.id === editingId) ?? null : null;
@@ -33,13 +37,20 @@ export function EvidenciasForm({ entries }: EvidenciasFormProps) {
   function handleDelete(id: string) {
     if (!window.confirm("¿Eliminar este enlace de tu CV Vivo?")) return;
     setDeleteError(null);
-    startDeleteTransition(async () => {
+    startRefresh(async () => {
       const result = await deleteEvidenceEntry(id);
       if (result.status === "error") {
         setDeleteError(result.message);
         return;
       }
       if (editingId === id) setEditingId(null);
+      router.refresh();
+    });
+  }
+
+  function handleSaved() {
+    setEditingId(null);
+    startRefresh(() => {
       router.refresh();
     });
   }
@@ -54,11 +65,13 @@ export function EvidenciasForm({ entries }: EvidenciasFormProps) {
               entry={entry}
               onEdit={() => setEditingId(entry.id)}
               onDelete={() => handleDelete(entry.id)}
-              disabled={isDeleting}
+              disabled={isRefreshing}
             />
           ))}
         </ul>
       )}
+
+      {isRefreshing && <LoadingRow />}
 
       {deleteError && (
         <p role="alert" className="font-body text-small text-status-danger">
@@ -70,14 +83,11 @@ export function EvidenciasForm({ entries }: EvidenciasFormProps) {
         <EntryForm
           key={editingId}
           entry={editingEntry}
-          onSaved={() => {
-            setEditingId(null);
-            router.refresh();
-          }}
+          onSaved={handleSaved}
           onCancel={entries.length === 0 ? undefined : () => setEditingId(null)}
         />
       ) : (
-        <Button variant="outline" icon={Plus} onClick={() => setEditingId("new")}>
+        <Button variant="outline" icon={Plus} onClick={() => setEditingId("new")} disabled={isRefreshing}>
           Agregar otro enlace
         </Button>
       )}
@@ -206,8 +216,8 @@ function EntryForm({
               Cancelar
             </Button>
           )}
-          <Button type="submit" fullWidth={!onCancel} disabled={isPending}>
-            {isPending ? "Guardando…" : "Guardar"}
+          <Button type="submit" fullWidth={!onCancel} loading={isPending}>
+            Guardar
           </Button>
         </div>
       </Card>

@@ -23,21 +23,23 @@ export type CatalogTable =
   | "project_types"
   | "certification_types";
 
-const getCachedCatalog = unstable_cache(
-  async (table: CatalogTable) => {
-    const supabase = createPublicClient();
-    const { data, error } = await supabase.from(table).select("*");
+// Genérica sobre el nombre de tabla (en vez de un solo `unstable_cache` con
+// `table: CatalogTable`) para que el tipo de retorno se angoste a las
+// columnas reales de esa tabla — con `table` como unión, TS infería una
+// unión de las columnas de TODOS los catálogos.
+export async function getCatalog<T extends CatalogTable>(table: T) {
+  return unstable_cache(
+    async () => {
+      const supabase = createPublicClient();
+      const { data, error } = await supabase.from(table).select("*");
 
-    if (error) {
-      throw new Error(`No se pudo cargar el catálogo "${table}": ${error.message}`);
-    }
+      if (error) {
+        throw new Error(`No se pudo cargar el catálogo "${table}": ${error.message}`);
+      }
 
-    return data;
-  },
-  ["catalog"],
-  { revalidate: 300 },
-);
-
-export async function getCatalog(table: CatalogTable) {
-  return getCachedCatalog(table);
+      return data;
+    },
+    ["catalog", table],
+    { revalidate: 300 },
+  )();
 }

@@ -15,10 +15,9 @@ type RegistroPageProps = {
 };
 
 export default async function RegistroPage({ searchParams }: RegistroPageProps) {
-  const [{ error }, countries, universities, studyFields, referralSources] = await Promise.all([
+  const [{ error }, countries, studyFields, referralSources] = await Promise.all([
     searchParams,
     getCatalog("countries"),
-    getCatalog("universities"),
     getCatalog("study_fields"),
     getCatalog("referral_sources"),
   ]);
@@ -58,7 +57,6 @@ export default async function RegistroPage({ searchParams }: RegistroPageProps) 
         )}
         <RegistroForm
           countries={countries.map((c) => ({ value: c.id, label: c.name }))}
-          universities={universities.map((u) => ({ value: u.id, label: u.name }))}
           studyFields={studyFields.map((s) => ({ value: s.id, label: s.name }))}
           referralSources={referralSources.map((r) => ({ value: r.id, label: r.name }))}
         />

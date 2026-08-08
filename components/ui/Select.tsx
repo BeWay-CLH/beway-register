@@ -18,12 +18,16 @@ type SelectProps = SelectHTMLAttributes<HTMLSelectElement> & {
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
   ({ options, placeholder, invalid = false, className, id, ...props }, ref) => {
     const generatedId = useId();
+    // Cuando el consumidor controla el valor (value+onChange, ej. cascada
+    // país→universidad), defaultValue="" entra en conflicto con value y
+    // React lo marca como controlado/no controlado a la vez.
+    const isControlled = "value" in props;
     return (
       <div className="relative w-full">
         <select
           ref={ref}
           id={id ?? generatedId}
-          defaultValue=""
+          {...(isControlled ? {} : { defaultValue: "" })}
           className={clsx(
             "h-control-md w-full appearance-none rounded-md border bg-surface-card px-3 pr-9 font-body text-body text-text-body",
             "transition-all duration-fast ease-standard focus-visible:outline-none focus-visible:shadow-focus-ring",

@@ -9,18 +9,19 @@ import { ArrowRight } from "lucide-react";
 import { personalSchema, type PersonalInput } from "@/lib/validations/cv-vivo/personal";
 import { savePersonal } from "@/app/cv-vivo/personal/actions";
 import { Field } from "@/components/ui/Field";
-import { Input } from "@/components/ui/Input";
 import { Select, type SelectOption } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
+import { PhoneField } from "@/components/forms/PhoneField";
 
 type PersonalFormValues = z.input<typeof personalSchema>;
 
 type PersonalFormProps = {
   academicStatuses: SelectOption[];
-  defaultValues: { phone: string; academicStatusId: number | undefined };
+  countries: SelectOption[];
+  defaultValues: { phoneCountryId: string; phone: string; academicStatusId: number | undefined };
 };
 
-export function PersonalForm({ academicStatuses, defaultValues }: PersonalFormProps) {
+export function PersonalForm({ academicStatuses, countries, defaultValues }: PersonalFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [formError, setFormError] = useState<string | null>(null);
@@ -32,6 +33,7 @@ export function PersonalForm({ academicStatuses, defaultValues }: PersonalFormPr
   } = useForm<PersonalFormValues, unknown, PersonalInput>({
     resolver: zodResolver(personalSchema),
     defaultValues: {
+      phoneCountryId: defaultValues.phoneCountryId,
       phone: defaultValues.phone,
       academicStatusId: defaultValues.academicStatusId,
     },
@@ -52,7 +54,12 @@ export function PersonalForm({ academicStatuses, defaultValues }: PersonalFormPr
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-5">
       <Field label="Teléfono" htmlFor="phone" hint="Opcional. Lo usan las empresas para contactarte.">
-        <Input id="phone" type="tel" autoComplete="tel" {...register("phone")} />
+        <PhoneField
+          countries={countries}
+          countryFieldProps={register("phoneCountryId")}
+          numberFieldProps={register("phone")}
+          invalidNumber={!!errors.phone}
+        />
       </Field>
 
       <Field label="Situación académica" required htmlFor="academicStatusId" error={errors.academicStatusId?.message}>

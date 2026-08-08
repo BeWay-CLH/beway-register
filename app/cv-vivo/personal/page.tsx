@@ -9,7 +9,10 @@ export default async function PersonalPage() {
   const profile = await getCurrentProfile();
   if (!profile) redirect("/registro");
 
-  const academicStatuses = await getCatalog("academic_status");
+  const [academicStatuses, countries] = await Promise.all([
+    getCatalog("academic_status"),
+    getCatalog("countries"),
+  ]);
   const { position, total } = getStagePosition("personal");
 
   return (
@@ -25,7 +28,15 @@ export default async function PersonalPage() {
       </div>
       <PersonalForm
         academicStatuses={academicStatuses.map((a) => ({ value: a.id, label: a.name }))}
-        defaultValues={{ phone: profile.phone ?? "", academicStatusId: profile.academic_status_id ?? undefined }}
+        countries={countries.map((c) => ({
+          value: c.id,
+          label: c.calling_code ? `${c.calling_code} ${c.name}` : c.name,
+        }))}
+        defaultValues={{
+          phoneCountryId: profile.phone_country_id ?? "",
+          phone: profile.phone ?? "",
+          academicStatusId: profile.academic_status_id ?? undefined,
+        }}
       />
     </div>
   );

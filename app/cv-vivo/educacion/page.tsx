@@ -12,13 +12,13 @@ export default async function EducacionPage() {
 
   const { position, total } = getStagePosition("educacion");
   const supabase = await createClient();
-  const [{ data: rows }, universities, studyFields, academicStatuses] = await Promise.all([
+  const [{ data: rows }, countries, studyFields, academicStatuses] = await Promise.all([
     supabase
       .from("education")
-      .select("*")
+      .select("*, universities(name)")
       .eq("profile_id", profile.id)
       .order("created_at", { ascending: true }),
-    getCatalog("universities"),
+    getCatalog("countries"),
     getCatalog("study_fields"),
     getCatalog("academic_status"),
   ]);
@@ -26,6 +26,7 @@ export default async function EducacionPage() {
   const entries: EducationEntry[] = (rows ?? []).map((row) => ({
     id: row.id,
     universityId: row.university_id,
+    universityName: row.universities?.name ?? null,
     studyFieldId: row.study_field_id,
     academicStatusId: row.academic_status_id,
     startDate: row.start_date,
@@ -49,10 +50,11 @@ export default async function EducacionPage() {
       </div>
       <EducacionForm
         entries={entries}
-        universities={universities.map((u) => ({ value: u.id, label: u.name }))}
+        countries={countries.map((c) => ({ value: c.id, label: c.name }))}
         studyFields={studyFields.map((s) => ({ value: s.id, label: s.name }))}
         academicStatuses={academicStatuses.map((a) => ({ value: a.id, label: a.name }))}
         prefill={{
+          countryId: profile.country_id,
           universityId: profile.university_id,
           studyFieldId: profile.study_field_id,
           academicStatusId: profile.academic_status_id,

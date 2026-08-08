@@ -16,10 +16,12 @@ import { Checkbox } from "@/components/ui/Checkbox";
 import { Textarea } from "@/components/ui/Textarea";
 import { Button } from "@/components/ui/Button";
 import { LoadingRow } from "@/components/ui/LoadingRow";
+import { UniversitySelect } from "@/components/forms/UniversitySelect";
 
 export type EducationEntry = {
   id: string;
   universityId: number | null;
+  universityName: string | null;
   studyFieldId: number | null;
   academicStatusId: number | null;
   startDate: string | null;
@@ -30,6 +32,7 @@ export type EducationEntry = {
 };
 
 type Prefill = {
+  countryId: string | null;
   universityId: number | null;
   studyFieldId: number | null;
   academicStatusId: number | null;
@@ -37,13 +40,13 @@ type Prefill = {
 
 type EducacionFormProps = {
   entries: EducationEntry[];
-  universities: SelectOption[];
+  countries: SelectOption[];
   studyFields: SelectOption[];
   academicStatuses: SelectOption[];
   prefill: Prefill;
 };
 
-export function EducacionForm({ entries, universities, studyFields, academicStatuses, prefill }: EducacionFormProps) {
+export function EducacionForm({ entries, countries, studyFields, academicStatuses, prefill }: EducacionFormProps) {
   const router = useRouter();
   const [editingId, setEditingId] = useState<string | "new" | null>(entries.length === 0 ? "new" : null);
   // Cubre tanto guardar como eliminar: vive en el padre para que siga
@@ -83,7 +86,6 @@ export function EducacionForm({ entries, universities, studyFields, academicStat
             <EntryCard
               key={entry.id}
               entry={entry}
-              universities={universities}
               studyFields={studyFields}
               onEdit={() => setEditingId(entry.id)}
               onDelete={() => handleDelete(entry.id)}
@@ -105,7 +107,7 @@ export function EducacionForm({ entries, universities, studyFields, academicStat
         <EntryForm
           key={editingId}
           entry={editingEntry}
-          universities={universities}
+          countries={countries}
           studyFields={studyFields}
           academicStatuses={academicStatuses}
           prefill={prefill}
@@ -129,20 +131,17 @@ export function EducacionForm({ entries, universities, studyFields, academicStat
 
 function EntryCard({
   entry,
-  universities,
   studyFields,
   onEdit,
   onDelete,
   disabled,
 }: {
   entry: EducationEntry;
-  universities: SelectOption[];
   studyFields: SelectOption[];
   onEdit: () => void;
   onDelete: () => void;
   disabled: boolean;
 }) {
-  const universityName = universities.find((u) => u.value === entry.universityId)?.label ?? "Universidad";
   const studyFieldName = studyFields.find((s) => s.value === entry.studyFieldId)?.label ?? "Carrera";
 
   return (
@@ -150,7 +149,7 @@ function EntryCard({
       <Card elevation="sm" className="flex items-start justify-between gap-4">
         <div className="flex flex-col gap-1">
           <p className="font-body text-body font-semibold text-text-body">{studyFieldName}</p>
-          <p className="font-body text-small text-text-muted">{universityName}</p>
+          <p className="font-body text-small text-text-muted">{entry.universityName ?? "Universidad"}</p>
           <p className="font-body text-small text-text-muted">
             {formatDateRange(entry.startDate, entry.endDate, entry.isCurrent)}
           </p>
@@ -191,7 +190,7 @@ type EntryFormValues = z.input<typeof educationEntrySchema>;
 
 function EntryForm({
   entry,
-  universities,
+  countries,
   studyFields,
   academicStatuses,
   prefill,
@@ -199,7 +198,7 @@ function EntryForm({
   onCancel,
 }: {
   entry: EducationEntry | null;
-  universities: SelectOption[];
+  countries: SelectOption[];
   studyFields: SelectOption[];
   academicStatuses: SelectOption[];
   prefill: Prefill;
@@ -208,11 +207,15 @@ function EntryForm({
 }) {
   const [isPending, startTransition] = useTransition();
   const [formError, setFormError] = useState<string | null>(null);
+  // Filtro de universidad, no se guarda en `education` (que solo tiene
+  // university_id) — se preselecciona con el país del Paso 1.
+  const [countryId, setCountryId] = useState<string | null>(prefill.countryId);
 
   const {
     register,
     handleSubmit,
     control,
+    setValue,
     formState: { errors },
   } = useForm<EntryFormValues, unknown, EducationEntryInput>({
     resolver: zodResolver(educationEntrySchema),
@@ -245,13 +248,23 @@ function EntryForm({
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate>
       <Card elevation="sm" className="flex flex-col gap-5">
-        <Field label="Universidad" required htmlFor="universityId" error={errors.universityId?.message}>
+        <Field label="País de la institución" htmlFor="entryCountryId" hint="Para filtrar la lista de universidades.">
           <Select
+            id="entryCountryId"
+            placeholder="Selecciona un país"
+            options={countries}
+            value={countryId ?? ""}
+            onChange={(event) => setCountryId(event.target.value || null)}
+          />
+        </Field>
+        <Field label="Universidad" required htmlFor="universityId" error={errors.universityId?.message}>
+          <UniversitySelect
             id="universityId"
-            placeholder="Selecciona tu universidad"
-            options={universities}
+            control={control}
+            setValue={setValue}
+            name="universityId"
+            countryId={countryId}
             invalid={!!errors.universityId}
-            {...register("universityId")}
           />
         </Field>
         <Field label="Carrera" required htmlFor="studyFieldId" error={errors.studyFieldId?.message}>

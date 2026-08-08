@@ -23,6 +23,7 @@ export async function savePersonal(input: PersonalInput): Promise<SaveStageResul
     .from("profiles")
     .update({
       phone: parsed.data.phone,
+      phone_country_id: parsed.data.phoneCountryId,
       academic_status_id: parsed.data.academicStatusId,
     })
     .eq("id", userId)

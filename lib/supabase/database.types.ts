@@ -139,18 +139,21 @@ export type Database = {
       }
       countries: {
         Row: {
+          calling_code: string | null
           id: string
           is_active: boolean
           name: string
           sort_order: number
         }
         Insert: {
+          calling_code?: string | null
           id: string
           is_active?: boolean
           name: string
           sort_order?: number
         }
         Update: {
+          calling_code?: string | null
           id?: string
           is_active?: boolean
           name?: string
@@ -646,6 +649,7 @@ export type Database = {
           id: string
           marketing_consent: boolean
           phone: string | null
+          phone_country_id: string | null
           profile_photo_url: string | null
           referral_source_id: number | null
           study_field_id: number | null
@@ -665,6 +669,7 @@ export type Database = {
           id: string
           marketing_consent?: boolean
           phone?: string | null
+          phone_country_id?: string | null
           profile_photo_url?: string | null
           referral_source_id?: number | null
           study_field_id?: number | null
@@ -684,6 +689,7 @@ export type Database = {
           id?: string
           marketing_consent?: boolean
           phone?: string | null
+          phone_country_id?: string | null
           profile_photo_url?: string | null
           referral_source_id?: number | null
           study_field_id?: number | null
@@ -703,6 +709,13 @@ export type Database = {
           {
             foreignKeyName: "profiles_country_id_fkey"
             columns: ["country_id"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_phone_country_id_fkey"
+            columns: ["phone_country_id"]
             isOneToOne: false
             referencedRelation: "countries"
             referencedColumns: ["id"]

@@ -16,6 +16,7 @@ export type WizardContext = {
   hasCertifications: boolean;
   hasPreferences: boolean;
   hasEvidences: boolean;
+  hasPrivacySettings: boolean;
 };
 
 export type WizardStage = {
@@ -111,7 +112,17 @@ export const WIZARD_STAGES: WizardStage[] = [
     order: 11,
     label: "Privacidad",
     description: "Quién puede ver tu perfil y tus datos de contacto.",
-    implemented: false,
-    isComplete: () => false,
+    implemented: true,
+    isComplete: (ctx) => ctx.hasPrivacySettings,
   },
 ];
+
+// Posición dentro del wizard (1-10) — distinta de `order` (2-11), que es la
+// numeración de CLAUDE.md que incluye el Paso 1 (registro, fuera del
+// wizard). Los encabezados de cada etapa muestran esta posición, nunca
+// `order` directamente, para no confundir al usuario con una etapa 1 que
+// nunca ve dentro de /cv-vivo.
+export function getStagePosition(slug: string): { position: number; total: number } {
+  const stage = WIZARD_STAGES.find((s) => s.slug === slug);
+  return { position: stage ? stage.order - 1 : 0, total: WIZARD_STAGES.length };
+}

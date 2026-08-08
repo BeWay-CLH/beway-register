@@ -37,6 +37,7 @@ export const getWizardContext = cache(async (): Promise<WizardContext | null> =>
     { count: certificationsCount },
     { data: preferences },
     { count: evidencesCount },
+    { count: privacySettingsCount },
   ] = await Promise.all([
     supabase.from("education").select("*", { count: "exact", head: true }).eq("profile_id", profile.id),
     supabase.from("experiences").select("*", { count: "exact", head: true }).eq("profile_id", profile.id),
@@ -46,6 +47,7 @@ export const getWizardContext = cache(async (): Promise<WizardContext | null> =>
     supabase.from("certifications").select("*", { count: "exact", head: true }).eq("profile_id", profile.id),
     supabase.from("preferences").select("availability_option_id").eq("profile_id", profile.id).maybeSingle(),
     supabase.from("evidences").select("*", { count: "exact", head: true }).eq("profile_id", profile.id),
+    supabase.from("privacy_settings").select("*", { count: "exact", head: true }).eq("profile_id", profile.id),
   ]);
 
   return {
@@ -58,5 +60,6 @@ export const getWizardContext = cache(async (): Promise<WizardContext | null> =>
     hasCertifications: (certificationsCount ?? 0) > 0,
     hasPreferences: preferences?.availability_option_id != null,
     hasEvidences: (evidencesCount ?? 0) > 0,
+    hasPrivacySettings: (privacySettingsCount ?? 0) > 0,
   };
 });

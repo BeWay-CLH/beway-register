@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/cv-vivo/get-current-profile";
 import { createClient } from "@/lib/supabase/server";
 import { getCatalog } from "@/lib/catalogs";
+import { getStagePosition } from "@/lib/cv-vivo/stages";
 import { PreferenciasForm } from "@/components/forms/PreferenciasForm";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 
@@ -9,6 +10,7 @@ export default async function PreferenciasPage() {
   const profile = await getCurrentProfile();
   if (!profile) redirect("/registro");
 
+  const { position, total } = getStagePosition("preferencias");
   const supabase = await createClient();
   const [
     { data: preferences },
@@ -32,7 +34,9 @@ export default async function PreferenciasPage() {
 
   return (
     <div className="flex w-full max-w-md flex-col gap-6">
-      <SectionLabel>Etapa 9 de 10</SectionLabel>
+      <SectionLabel>
+        Etapa {position} de {total}
+      </SectionLabel>
       <div>
         <h1 className="font-heading text-h1 text-brand-dark">Preferencias profesionales</h1>
         <p className="mt-2 font-body text-body text-text-muted">Cuéntanos qué tipo de oportunidades buscas.</p>

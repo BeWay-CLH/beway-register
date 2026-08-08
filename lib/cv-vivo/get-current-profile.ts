@@ -33,62 +33,37 @@ export const getCurrentProfile = cache(async (): Promise<ProfileRow | null> => {
 // Contexto de completitud del wizard (ver lib/cv-vivo/stages.ts >
 // WizardContext) — agrega a getCurrentProfile las señales de las tablas
 // hijas que cada etapa implementada necesita. Cacheado por request.
+//
+// Antes esto eran 9 consultas de conteo en paralelo (una por tabla); ahora
+// es una sola ida y vuelta a la función get_wizard_progress en Postgres
+// (ver supabase/migrations/20260808120000_wizard_progress_function.sql) —
+// esto se ejecuta en cada navegación dentro del wizard, así que colapsar
+// las idas y vueltas aquí tiene el mayor impacto en la sensación de
+// velocidad de toda la app.
 export const getWizardContext = cache(async (): Promise<WizardContext | null> => {
   const profile = await getCurrentProfile();
   if (!profile) return null;
 
   const supabase = await createClient();
-  const [
-    educationResult,
-    experienceResult,
-    projectsResult,
-    skillsResult,
-    languagesResult,
-    certificationsResult,
-    preferencesResult,
-    evidencesResult,
-    privacySettingsResult,
-  ] = await Promise.all([
-    supabase.from("education").select("*", { count: "exact", head: true }).eq("profile_id", profile.id),
-    supabase.from("experiences").select("*", { count: "exact", head: true }).eq("profile_id", profile.id),
-    supabase.from("projects").select("*", { count: "exact", head: true }).eq("profile_id", profile.id),
-    supabase.from("skills").select("*", { count: "exact", head: true }).eq("profile_id", profile.id),
-    supabase.from("languages").select("*", { count: "exact", head: true }).eq("profile_id", profile.id),
-    supabase.from("certifications").select("*", { count: "exact", head: true }).eq("profile_id", profile.id),
-    supabase.from("preferences").select("availability_option_id").eq("profile_id", profile.id).maybeSingle(),
-    supabase.from("evidences").select("*", { count: "exact", head: true }).eq("profile_id", profile.id),
-    supabase.from("privacy_settings").select("*", { count: "exact", head: true }).eq("profile_id", profile.id),
-  ]);
+  const { data: progress, error } = await supabase
+    .rpc("get_wizard_progress", { p_profile_id: profile.id })
+    .single();
 
-  // Un error real (no "0 filas") aquí no debe leerse como "etapa vacía" —
-  // reportaría el wizard como menos completo de lo que realmente está.
-  const failedError = [
-    educationResult.error,
-    experienceResult.error,
-    projectsResult.error,
-    skillsResult.error,
-    languagesResult.error,
-    certificationsResult.error,
-    preferencesResult.error,
-    evidencesResult.error,
-    privacySettingsResult.error,
-  ].find(Boolean);
-
-  if (failedError) {
-    console.error("[getWizardContext] error inesperado calculando progreso:", failedError);
+  if (error || !progress) {
+    console.error("[getWizardContext] error inesperado calculando progreso:", error);
     throw new Error("No se pudo cargar tu progreso. Intenta de nuevo en un momento.");
   }
 
   return {
     profile,
-    hasEducation: (educationResult.count ?? 0) > 0,
-    hasExperience: (experienceResult.count ?? 0) > 0,
-    hasProjects: (projectsResult.count ?? 0) > 0,
-    hasSkills: (skillsResult.count ?? 0) > 0,
-    hasLanguages: (languagesResult.count ?? 0) > 0,
-    hasCertifications: (certificationsResult.count ?? 0) > 0,
-    hasPreferences: preferencesResult.data?.availability_option_id != null,
-    hasEvidences: (evidencesResult.count ?? 0) > 0,
-    hasPrivacySettings: (privacySettingsResult.count ?? 0) > 0,
+    hasEducation: progress.has_education,
+    hasExperience: progress.has_experience,
+    hasProjects: progress.has_projects,
+    hasSkills: progress.has_skills,
+    hasLanguages: progress.has_languages,
+    hasCertifications: progress.has_certifications,
+    hasPreferences: progress.has_preferences,
+    hasEvidences: progress.has_evidences,
+    hasPrivacySettings: progress.has_privacy_settings,
   };
 });

@@ -41,7 +41,7 @@ export default async function RegistroPage({ searchParams }: RegistroPageProps) 
   return (
     <main className="flex flex-1 flex-col md:flex-row">
       <div className="flex flex-col gap-6 bg-brand-gradient px-6 py-12 text-text-on-inverse md:w-1/2 md:justify-center md:px-16 md:py-24">
-        <Logo height={72} className="mx-auto md:mx-0" />
+        <Logo height={72} className="mx-auto md:mx-0" priority />
         <div className="flex flex-col gap-4 text-center md:text-left">
           <SectionLabel onInverse align="center" className="mx-auto md:mx-0 md:items-start">
             Únete

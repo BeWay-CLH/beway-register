@@ -6,7 +6,7 @@ import { SectionLabel } from "@/components/ui/SectionLabel";
 
 export default async function PresentacionPage() {
   const profile = await getCurrentProfile();
-  if (!profile) redirect("/registro");
+  if (!profile) redirect("/iniciar-sesion");
 
   const { position, total } = getStagePosition("presentacion");
 

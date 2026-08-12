@@ -7,7 +7,7 @@ import { getWizardProgress } from "@/lib/cv-vivo/progress";
 // retomar el progreso ("guardar y continuar" — CLAUDE.md > UX del wizard).
 export default async function CvVivoIndexPage() {
   const context = await getWizardContext();
-  if (!context) redirect("/registro");
+  if (!context) redirect("/iniciar-sesion");
 
   const progress = getWizardProgress(context);
   redirect(`/cv-vivo/${progress.nextIncompleteSlug}`);

@@ -7,7 +7,7 @@ import { SectionLabel } from "@/components/ui/SectionLabel";
 
 export default async function PersonalPage() {
   const profile = await getCurrentProfile();
-  if (!profile) redirect("/registro");
+  if (!profile) redirect("/iniciar-sesion");
 
   const [academicStatuses, countries] = await Promise.all([
     getCatalog("academic_status"),

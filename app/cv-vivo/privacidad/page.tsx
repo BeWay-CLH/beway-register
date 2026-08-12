@@ -8,7 +8,7 @@ import type { PrivacySettingsInput } from "@/lib/validations/cv-vivo/privacidad"
 
 export default async function PrivacidadPage() {
   const profile = await getCurrentProfile();
-  if (!profile) redirect("/registro");
+  if (!profile) redirect("/iniciar-sesion");
 
   const supabase = await createClient();
   const { data: privacy } = await supabase

@@ -8,7 +8,7 @@ import { SectionLabel } from "@/components/ui/SectionLabel";
 
 export default async function ProyectosPage() {
   const profile = await getCurrentProfile();
-  if (!profile) redirect("/registro");
+  if (!profile) redirect("/iniciar-sesion");
 
   const { position, total } = getStagePosition("proyectos");
   const supabase = await createClient();

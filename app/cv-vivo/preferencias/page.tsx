@@ -8,7 +8,7 @@ import { SectionLabel } from "@/components/ui/SectionLabel";
 
 export default async function PreferenciasPage() {
   const profile = await getCurrentProfile();
-  if (!profile) redirect("/registro");
+  if (!profile) redirect("/iniciar-sesion");
 
   const { position, total } = getStagePosition("preferencias");
   const supabase = await createClient();

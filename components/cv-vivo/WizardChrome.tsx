@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { clsx } from "clsx";
-import { Check } from "lucide-react";
+import { Check, UserCircle } from "lucide-react";
 import type { WizardProgress } from "@/lib/cv-vivo/progress";
 
 type WizardChromeProps = {
@@ -67,6 +67,13 @@ export function WizardChrome({ progress, children }: WizardChromeProps) {
             })}
           </ol>
         </nav>
+        <Link
+          href="/cuenta"
+          className="mt-auto flex items-center gap-2 rounded-md px-3 py-2 font-body text-small text-text-muted transition-colors duration-fast ease-standard hover:bg-surface-sunken hover:text-text-body"
+        >
+          <UserCircle size={16} />
+          Mi cuenta
+        </Link>
       </aside>
       <main className="flex flex-1 flex-col items-center px-6 py-12 md:px-16 md:py-16">{children}</main>
     </div>

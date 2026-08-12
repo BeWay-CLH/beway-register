@@ -1,4 +1,7 @@
 import { CheckCircle } from "lucide-react";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
 import { getCatalog } from "@/lib/catalogs";
 import { RegistroForm } from "@/components/forms/RegistroForm";
 import { Logo } from "@/components/ui/Logo";
@@ -15,12 +18,25 @@ type RegistroPageProps = {
 };
 
 export default async function RegistroPage({ searchParams }: RegistroPageProps) {
-  const [{ error }, countries, studyFields, referralSources] = await Promise.all([
+  const supabase = await createClient();
+  const [
+    {
+      data: { user },
+    },
+    { error },
+    countries,
+    studyFields,
+    referralSources,
+  ] = await Promise.all([
+    supabase.auth.getUser(),
     searchParams,
     getCatalog("countries"),
     getCatalog("study_fields"),
     getCatalog("referral_sources"),
   ]);
+
+  // Ya con sesión: no tiene sentido volver a mostrar el formulario de alta.
+  if (user) redirect("/cv-vivo");
 
   return (
     <main className="flex flex-1 flex-col md:flex-row">
@@ -60,6 +76,12 @@ export default async function RegistroPage({ searchParams }: RegistroPageProps) 
           studyFields={studyFields.map((s) => ({ value: s.id, label: s.name }))}
           referralSources={referralSources.map((r) => ({ value: r.id, label: r.name }))}
         />
+        <p className="font-body text-small text-text-muted">
+          ¿Ya tienes cuenta?{" "}
+          <Link href="/iniciar-sesion" className="font-semibold text-link hover:text-link-hover hover:underline">
+            Inicia sesión
+          </Link>
+        </p>
       </div>
     </main>
   );

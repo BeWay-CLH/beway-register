@@ -30,6 +30,9 @@
      las paradas no se cambian (manual de marca). */
   --brand-gradient: linear-gradient(135deg, var(--brand-dark) 0%, var(--brand-navy) 45%, var(--brand-cyan) 100%);
   --brand-gradient-soft: linear-gradient(135deg, var(--brand-navy) 0%, var(--brand-cyan) 100%);
+  /* Franja horizontal (banderola, pie de página) — mismos tonos de marca en
+     un degradado más sutil que el hero. */
+  --gradient-footer: linear-gradient(90deg, #0a8fa8 0%, var(--brand-navy) 45%, var(--brand-dark) 100%);
 
   /* ── Superficies semánticas ─────────────────────────────────── */
   --surface-page: var(--brand-light);

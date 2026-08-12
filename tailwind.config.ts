@@ -55,6 +55,7 @@ const config: Config = {
       backgroundImage: {
         "brand-gradient": "var(--brand-gradient)",
         "brand-gradient-soft": "var(--brand-gradient-soft)",
+        "gradient-footer": "var(--gradient-footer)",
       },
       fontFamily: {
         heading: ["var(--font-space-grotesk)", "sans-serif"],

@@ -85,6 +85,7 @@
   --shadow-md: 0 6px 16px rgba(11, 19, 43, 0.1);
   --shadow-lg: 0 16px 40px rgba(11, 19, 43, 0.14);
   --shadow-glow: 0 0 0 1px rgba(0, 212, 255, 0.35), 0 8px 24px rgba(0, 212, 255, 0.28);
+  --shadow-glow-sm: 0 0 12px rgba(0, 212, 255, 0.55);
   --ring-focus: 0 0 0 3px rgba(0, 212, 255, 0.4);
 
   /* ── Movimiento — preciso y corto, sin rebote ────────────────── */

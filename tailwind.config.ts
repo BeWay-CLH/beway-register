@@ -87,6 +87,7 @@ const config: Config = {
         md: "var(--shadow-md)",
         lg: "var(--shadow-lg)",
         glow: "var(--shadow-glow)",
+        "glow-sm": "var(--shadow-glow-sm)",
         "focus-ring": "var(--ring-focus)",
       },
       transitionDuration: {

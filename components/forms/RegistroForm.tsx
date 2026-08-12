@@ -20,6 +20,7 @@ import { FormField } from "@/components/cv-vivo/FormField";
 import { PasswordField } from "@/components/forms/PasswordField";
 import { UniversitySelect } from "@/components/forms/UniversitySelect";
 import { Turnstile } from "@/components/forms/Turnstile";
+import { UniversitySelect } from "@/components/forms/UniversitySelect";
 
 type RegistroFormValues = z.input<typeof registroSchema>;
 

@@ -2,15 +2,13 @@ import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/cv-vivo/get-current-profile";
 import { createClient } from "@/lib/supabase/server";
 import { getCatalog } from "@/lib/catalogs";
-import { getStagePosition } from "@/lib/cv-vivo/stages";
 import { CertificacionesForm, type CertificationEntry } from "@/components/forms/CertificacionesForm";
-import { SectionLabel } from "@/components/ui/SectionLabel";
+import { StageShell } from "@/components/cv-vivo/StageShell";
 
 export default async function CertificacionesPage() {
   const profile = await getCurrentProfile();
   if (!profile) redirect("/iniciar-sesion");
 
-  const { position, total } = getStagePosition("certificaciones");
   const supabase = await createClient();
   const [{ data: rows }, certificationTypes] = await Promise.all([
     supabase
@@ -31,21 +29,16 @@ export default async function CertificacionesPage() {
   }));
 
   return (
-    <div className="flex w-full max-w-md flex-col gap-6">
-      <SectionLabel>
-        Etapa {position} de {total}
-      </SectionLabel>
-      <div>
-        <h1 className="font-heading text-h1 text-brand-dark">Formación complementaria</h1>
-        <p className="mt-2 font-body text-body text-text-muted">
-          Suma valor a tu perfil con formación adicional. Hasta 3 cursos, certificaciones,
-          bootcamps o talleres.
-        </p>
-      </div>
+    <StageShell
+      slug="certificaciones"
+      title="Formación complementaria"
+      description="Suma valor a tu perfil con formación adicional. Hasta 3 cursos, certificaciones, bootcamps o talleres."
+      whyText="Las certificaciones y cursos complementarios demuestran tu iniciativa para aprender más allá de tu formación académica. Esto puede ser un diferencial importante para empresas que buscan candidatos comprometidos con el crecimiento continuo."
+    >
       <CertificacionesForm
         entries={entries}
         certificationTypes={certificationTypes.map((t) => ({ value: t.id, label: t.name }))}
       />
-    </div>
+    </StageShell>
   );
 }

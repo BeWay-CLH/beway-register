@@ -2,15 +2,13 @@ import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/cv-vivo/get-current-profile";
 import { createClient } from "@/lib/supabase/server";
 import { getCatalog } from "@/lib/catalogs";
-import { getStagePosition } from "@/lib/cv-vivo/stages";
 import { ProyectosForm, type ProjectEntry } from "@/components/forms/ProyectosForm";
-import { SectionLabel } from "@/components/ui/SectionLabel";
+import { StageShell } from "@/components/cv-vivo/StageShell";
 
 export default async function ProyectosPage() {
   const profile = await getCurrentProfile();
   if (!profile) redirect("/iniciar-sesion");
 
-  const { position, total } = getStagePosition("proyectos");
   const supabase = await createClient();
   const [{ data: rows }, projectTypes] = await Promise.all([
     supabase
@@ -32,18 +30,13 @@ export default async function ProyectosPage() {
   }));
 
   return (
-    <div className="flex w-full max-w-md flex-col gap-6">
-      <SectionLabel>
-        Etapa {position} de {total}
-      </SectionLabel>
-      <div>
-        <h1 className="font-heading text-h1 text-brand-dark">Proyectos y actividades</h1>
-        <p className="mt-2 font-body text-body text-text-muted">
-          Destaca lo que has construido fuera del salón de clases. Hasta 3 proyectos, actividades
-          extracurriculares o hackathons.
-        </p>
-      </div>
+    <StageShell
+      slug="proyectos"
+      title="Proyectos y actividades"
+      description="Destaca lo que has construido fuera del salón de clases. Hasta 3 proyectos, actividades extracurriculares o hackathons."
+      whyText="Tus proyectos demuestran iniciativa y habilidades aplicadas más allá del aula. Las empresas valoran la experiencia práctica y la capacidad de llevar ideas a la realidad."
+    >
       <ProyectosForm entries={entries} projectTypes={projectTypes.map((t) => ({ value: t.id, label: t.name }))} />
-    </div>
+    </StageShell>
   );
 }

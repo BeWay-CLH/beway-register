@@ -5,19 +5,21 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
-import { Plus, Pencil, Trash2, ArrowRight, ExternalLink } from "lucide-react";
+import { Plus, Award } from "lucide-react";
 import {
   certificationEntrySchema,
   type CertificationEntryInput,
 } from "@/lib/validations/cv-vivo/certificaciones";
 import { saveCertificationEntry, deleteCertificationEntry } from "@/app/cv-vivo/certificaciones/actions";
 import { MAX_REPEATABLE_ENTRIES } from "@/lib/cv-vivo/limits";
-import { Card } from "@/components/ui/Card";
-import { Field } from "@/components/ui/Field";
 import { Input } from "@/components/ui/Input";
 import { Select, type SelectOption } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
 import { LoadingRow } from "@/components/ui/LoadingRow";
+import { FieldLabel } from "@/components/ui/FieldLabel";
+import { FieldGroup } from "@/components/cv-vivo/FieldGroup";
+import { FormField } from "@/components/cv-vivo/FormField";
+import { EntryRow } from "@/components/cv-vivo/EntryRow";
 
 export type CertificationEntry = {
   id: string;
@@ -67,20 +69,25 @@ export function CertificacionesForm({ entries, certificationTypes }: Certificaci
   }
 
   return (
-    <div className="flex w-full max-w-md flex-col gap-6">
+    <div className="flex flex-col gap-6">
       {entries.length > 0 && (
-        <ul className="flex flex-col gap-3">
-          {entries.map((entry) => (
-            <EntryCard
-              key={entry.id}
-              entry={entry}
-              certificationTypes={certificationTypes}
-              onEdit={() => setEditingId(entry.id)}
-              onDelete={() => handleDelete(entry.id)}
-              disabled={isRefreshing}
-            />
-          ))}
-        </ul>
+        <div className="flex flex-col gap-3">
+          <FieldLabel>Ya añadido · {entries.length}</FieldLabel>
+          {entries.map((entry) => {
+            const typeName = certificationTypes.find((t) => t.value === entry.certificationTypeId)?.label ?? "Certificación";
+            return (
+              <EntryRow
+                key={entry.id}
+                icon={Award}
+                title={entry.name}
+                meta={`${entry.institution ?? "Institución"} · ${typeName}${entry.issueDate ? ` · ${new Date(entry.issueDate).toLocaleDateString("es-ES", { month: "short", year: "numeric" })}` : ""}`}
+                onEdit={() => setEditingId(entry.id)}
+                onDelete={() => handleDelete(entry.id)}
+                disabled={isRefreshing}
+              />
+            );
+          })}
+        </div>
       )}
 
       {isRefreshing && <LoadingRow />}
@@ -108,79 +115,7 @@ export function CertificacionesForm({ entries, certificationTypes }: Certificaci
           Agregar otra certificación
         </Button>
       )}
-
-      {entries.length > 0 && !editingId && (
-        <Button size="lg" fullWidth iconAfter={ArrowRight} onClick={() => router.push("/cv-vivo")}>
-          Continuar
-        </Button>
-      )}
     </div>
-  );
-}
-
-function EntryCard({
-  entry,
-  certificationTypes,
-  onEdit,
-  onDelete,
-  disabled,
-}: {
-  entry: CertificationEntry;
-  certificationTypes: SelectOption[];
-  onEdit: () => void;
-  onDelete: () => void;
-  disabled: boolean;
-}) {
-  const typeName = certificationTypes.find((t) => t.value === entry.certificationTypeId)?.label;
-
-  return (
-    <li>
-      <Card elevation="sm" className="flex items-start justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <p className="font-body text-body font-semibold text-text-body">{entry.name}</p>
-          {(entry.institution || typeName) && (
-            <p className="font-body text-small text-text-muted">
-              {[entry.institution, typeName].filter(Boolean).join(" · ")}
-            </p>
-          )}
-          {entry.issueDate && (
-            <p className="font-body text-small text-text-muted">
-              {new Date(entry.issueDate).toLocaleDateString("es-ES", { month: "short", year: "numeric" })}
-            </p>
-          )}
-          {entry.credentialUrl && (
-            <a
-              href={entry.credentialUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 font-body text-small text-link hover:text-link-hover hover:underline"
-            >
-              Ver credencial <ExternalLink size={12} />
-            </a>
-          )}
-        </div>
-        <div className="flex shrink-0 gap-1">
-          <button
-            type="button"
-            onClick={onEdit}
-            disabled={disabled}
-            aria-label="Editar"
-            className="rounded-md p-2 text-text-muted transition-colors duration-fast ease-standard hover:bg-surface-sunken hover:text-text-body disabled:cursor-not-allowed disabled:opacity-45"
-          >
-            <Pencil size={16} />
-          </button>
-          <button
-            type="button"
-            onClick={onDelete}
-            disabled={disabled}
-            aria-label="Eliminar"
-            className="rounded-md p-2 text-text-muted transition-colors duration-fast ease-standard hover:bg-surface-sunken hover:text-status-danger disabled:cursor-not-allowed disabled:opacity-45"
-          >
-            <Trash2 size={16} />
-          </button>
-        </div>
-      </Card>
-    </li>
   );
 }
 
@@ -229,12 +164,12 @@ function EntryForm({
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate>
-      <Card elevation="sm" className="flex flex-col gap-5">
-        <Field label="Nombre del curso o certificación" required htmlFor="name" error={errors.name?.message}>
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-6">
+      <FieldGroup title="Certificación">
+        <FormField label="Nombre del curso o certificación" required span={7} htmlFor="name" error={errors.name?.message}>
           <Input id="name" invalid={!!errors.name} {...register("name")} />
-        </Field>
-        <Field label="Tipo" required htmlFor="certificationTypeId" error={errors.certificationTypeId?.message}>
+        </FormField>
+        <FormField label="Tipo" required span={5} htmlFor="certificationTypeId" error={errors.certificationTypeId?.message}>
           <Select
             id="certificationTypeId"
             placeholder="Selecciona una opción"
@@ -242,17 +177,24 @@ function EntryForm({
             invalid={!!errors.certificationTypeId}
             {...register("certificationTypeId")}
           />
-        </Field>
-        <Field label="Institución" htmlFor="institution" hint="Opcional." error={errors.institution?.message}>
+        </FormField>
+        <FormField label="Institución" span={12} htmlFor="institution" error={errors.institution?.message}>
           <Input id="institution" invalid={!!errors.institution} {...register("institution")} />
-        </Field>
-        <Field label="Fecha de emisión" htmlFor="issueDate" hint="Opcional." error={errors.issueDate?.message}>
+        </FormField>
+      </FieldGroup>
+
+      <FieldGroup title="Fecha">
+        <FormField label="Fecha de emisión" span={5} htmlFor="issueDate" error={errors.issueDate?.message}>
           <Input id="issueDate" type="date" invalid={!!errors.issueDate} {...register("issueDate")} />
-        </Field>
-        <Field
+        </FormField>
+      </FieldGroup>
+
+      <FieldGroup title="Detalle" caption="Opcional">
+        <FormField
           label="Enlace a la credencial"
+          span={12}
           htmlFor="credentialUrl"
-          hint="Opcional. Incluye https:// al inicio."
+          hint="Incluye https:// al inicio."
           error={errors.credentialUrl?.message}
         >
           <Input
@@ -262,25 +204,25 @@ function EntryForm({
             invalid={!!errors.credentialUrl}
             {...register("credentialUrl")}
           />
-        </Field>
+        </FormField>
+      </FieldGroup>
 
-        {formError && (
-          <p role="alert" className="font-body text-small text-status-danger">
-            {formError}
-          </p>
-        )}
+      {formError && (
+        <p role="alert" className="font-body text-small text-status-danger">
+          {formError}
+        </p>
+      )}
 
-        <div className="flex gap-3">
-          {onCancel && (
-            <Button variant="outline" type="button" onClick={onCancel} disabled={isPending}>
-              Cancelar
-            </Button>
-          )}
-          <Button type="submit" fullWidth={!onCancel} loading={isPending}>
-            Guardar
+      <div className="flex gap-3">
+        {onCancel && (
+          <Button variant="outline" type="button" onClick={onCancel} disabled={isPending}>
+            Cancelar
           </Button>
-        </div>
-      </Card>
+        )}
+        <Button type="submit" fullWidth={!onCancel} loading={isPending}>
+          Guardar
+        </Button>
+      </div>
     </form>
   );
 }

@@ -1,9 +1,8 @@
 import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/cv-vivo/get-current-profile";
 import { createClient } from "@/lib/supabase/server";
-import { getStagePosition } from "@/lib/cv-vivo/stages";
 import { PrivacidadForm } from "@/components/forms/PrivacidadForm";
-import { SectionLabel } from "@/components/ui/SectionLabel";
+import { StageShell } from "@/components/cv-vivo/StageShell";
 import type { PrivacySettingsInput } from "@/lib/validations/cv-vivo/privacidad";
 
 export default async function PrivacidadPage() {
@@ -24,20 +23,14 @@ export default async function PrivacidadPage() {
     showContactPhone: privacy?.show_contact_phone ?? false,
   };
 
-  const { position, total } = getStagePosition("privacidad");
-
   return (
-    <div className="flex w-full max-w-md flex-col gap-6">
-      <SectionLabel>
-        Etapa {position} de {total}
-      </SectionLabel>
-      <div>
-        <h1 className="font-heading text-h1 text-brand-dark">Privacidad</h1>
-        <p className="mt-2 font-body text-body text-text-muted">
-          Última etapa — define quién puede ver tu perfil y tus datos de contacto.
-        </p>
-      </div>
+    <StageShell
+      slug="privacidad"
+      title="Privacidad"
+      description="Define quién puede ver tu perfil y tus datos de contacto."
+      whyText="Controlas quién accede a tu información. Las empresas respetan tu privacidad y solo verán los datos que decidas compartir."
+    >
       <PrivacidadForm defaultValues={defaultValues} />
-    </div>
+    </StageShell>
   );
 }

@@ -88,6 +88,7 @@ const config: Config = {
         lg: "var(--shadow-lg)",
         glow: "var(--shadow-glow)",
         "glow-sm": "var(--shadow-glow-sm)",
+        "sticky-top": "var(--shadow-sticky-top)",
         "focus-ring": "var(--ring-focus)",
       },
       transitionDuration: {

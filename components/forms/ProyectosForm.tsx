@@ -5,17 +5,19 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
-import { Plus, Pencil, Trash2, ArrowRight, ExternalLink } from "lucide-react";
+import { Plus, Rocket } from "lucide-react";
 import { projectEntrySchema, type ProjectEntryInput } from "@/lib/validations/cv-vivo/proyectos";
 import { saveProjectEntry, deleteProjectEntry } from "@/app/cv-vivo/proyectos/actions";
 import { MAX_REPEATABLE_ENTRIES } from "@/lib/cv-vivo/limits";
-import { Card } from "@/components/ui/Card";
-import { Field } from "@/components/ui/Field";
 import { Input } from "@/components/ui/Input";
 import { Select, type SelectOption } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
 import { Button } from "@/components/ui/Button";
 import { LoadingRow } from "@/components/ui/LoadingRow";
+import { FieldLabel } from "@/components/ui/FieldLabel";
+import { FieldGroup } from "@/components/cv-vivo/FieldGroup";
+import { FormField } from "@/components/cv-vivo/FormField";
+import { EntryRow } from "@/components/cv-vivo/EntryRow";
 
 export type ProjectEntry = {
   id: string;
@@ -66,20 +68,25 @@ export function ProyectosForm({ entries, projectTypes }: ProyectosFormProps) {
   }
 
   return (
-    <div className="flex w-full max-w-md flex-col gap-6">
+    <div className="flex flex-col gap-6">
       {entries.length > 0 && (
-        <ul className="flex flex-col gap-3">
-          {entries.map((entry) => (
-            <EntryCard
-              key={entry.id}
-              entry={entry}
-              projectTypes={projectTypes}
-              onEdit={() => setEditingId(entry.id)}
-              onDelete={() => handleDelete(entry.id)}
-              disabled={isRefreshing}
-            />
-          ))}
-        </ul>
+        <div className="flex flex-col gap-3">
+          <FieldLabel>Ya añadido · {entries.length}</FieldLabel>
+          {entries.map((entry) => {
+            const typeName = projectTypes.find((t) => t.value === entry.projectTypeId)?.label ?? "Proyecto";
+            return (
+              <EntryRow
+                key={entry.id}
+                icon={Rocket}
+                title={entry.name}
+                meta={`${typeName} · ${formatDateRange(entry.startDate, entry.endDate)}`}
+                onEdit={() => setEditingId(entry.id)}
+                onDelete={() => handleDelete(entry.id)}
+                disabled={isRefreshing}
+              />
+            );
+          })}
+        </div>
       )}
 
       {isRefreshing && <LoadingRow />}
@@ -107,73 +114,7 @@ export function ProyectosForm({ entries, projectTypes }: ProyectosFormProps) {
           Agregar otro proyecto
         </Button>
       )}
-
-      {entries.length > 0 && !editingId && (
-        <Button size="lg" fullWidth iconAfter={ArrowRight} onClick={() => router.push("/cv-vivo")}>
-          Continuar
-        </Button>
-      )}
     </div>
-  );
-}
-
-function EntryCard({
-  entry,
-  projectTypes,
-  onEdit,
-  onDelete,
-  disabled,
-}: {
-  entry: ProjectEntry;
-  projectTypes: SelectOption[];
-  onEdit: () => void;
-  onDelete: () => void;
-  disabled: boolean;
-}) {
-  const typeName = projectTypes.find((t) => t.value === entry.projectTypeId)?.label;
-
-  return (
-    <li>
-      <Card elevation="sm" className="flex items-start justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <p className="font-body text-body font-semibold text-text-body">{entry.name}</p>
-          {typeName && <p className="font-body text-small text-text-muted">{typeName}</p>}
-          {(entry.startDate || entry.endDate) && (
-            <p className="font-body text-small text-text-muted">{formatDateRange(entry.startDate, entry.endDate)}</p>
-          )}
-          {entry.url && (
-            <a
-              href={entry.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 font-body text-small text-link hover:text-link-hover hover:underline"
-            >
-              Ver enlace <ExternalLink size={12} />
-            </a>
-          )}
-        </div>
-        <div className="flex shrink-0 gap-1">
-          <button
-            type="button"
-            onClick={onEdit}
-            disabled={disabled}
-            aria-label="Editar"
-            className="rounded-md p-2 text-text-muted transition-colors duration-fast ease-standard hover:bg-surface-sunken hover:text-text-body disabled:cursor-not-allowed disabled:opacity-45"
-          >
-            <Pencil size={16} />
-          </button>
-          <button
-            type="button"
-            onClick={onDelete}
-            disabled={disabled}
-            aria-label="Eliminar"
-            className="rounded-md p-2 text-text-muted transition-colors duration-fast ease-standard hover:bg-surface-sunken hover:text-status-danger disabled:cursor-not-allowed disabled:opacity-45"
-          >
-            <Trash2 size={16} />
-          </button>
-        </div>
-      </Card>
-    </li>
   );
 }
 
@@ -228,12 +169,12 @@ function EntryForm({
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate>
-      <Card elevation="sm" className="flex flex-col gap-5">
-        <Field label="Nombre del proyecto" required htmlFor="name" error={errors.name?.message}>
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-6">
+      <FieldGroup title="Proyecto">
+        <FormField label="Nombre" span={7} required htmlFor="name" error={errors.name?.message}>
           <Input id="name" invalid={!!errors.name} {...register("name")} />
-        </Field>
-        <Field label="Tipo de proyecto" required htmlFor="projectTypeId" error={errors.projectTypeId?.message}>
+        </FormField>
+        <FormField label="Tipo" span={5} required htmlFor="projectTypeId" error={errors.projectTypeId?.message}>
           <Select
             id="projectTypeId"
             placeholder="Selecciona una opción"
@@ -241,42 +182,43 @@ function EntryForm({
             invalid={!!errors.projectTypeId}
             {...register("projectTypeId")}
           />
-        </Field>
-        <Field
-          label="Enlace"
-          htmlFor="url"
-          hint="Opcional. Incluye https:// al inicio."
-          error={errors.url?.message}
-        >
+        </FormField>
+        <FormField label="Enlace" span={12} htmlFor="url" hint="Incluye https:// al inicio." error={errors.url?.message}>
           <Input id="url" type="url" placeholder="https://…" invalid={!!errors.url} {...register("url")} />
-        </Field>
-        <Field label="Fecha de inicio" htmlFor="startDate" hint="Opcional." error={errors.startDate?.message}>
+        </FormField>
+      </FieldGroup>
+
+      <FieldGroup title="Periodo">
+        <FormField label="Fecha de inicio" span={4} htmlFor="startDate" error={errors.startDate?.message}>
           <Input id="startDate" type="date" invalid={!!errors.startDate} {...register("startDate")} />
-        </Field>
-        <Field label="Fecha de fin" htmlFor="endDate" hint="Opcional." error={errors.endDate?.message}>
+        </FormField>
+        <FormField label="Fecha de fin" span={4} htmlFor="endDate" error={errors.endDate?.message}>
           <Input id="endDate" type="date" invalid={!!errors.endDate} {...register("endDate")} />
-        </Field>
-        <Field label="Descripción" htmlFor="description" hint="Opcional." error={errors.description?.message}>
+        </FormField>
+      </FieldGroup>
+
+      <FieldGroup title="Detalle" caption="Opcional">
+        <FormField label="Descripción" span={12} htmlFor="description" error={errors.description?.message}>
           <Textarea id="description" rows={3} invalid={!!errors.description} {...register("description")} />
-        </Field>
+        </FormField>
+      </FieldGroup>
 
-        {formError && (
-          <p role="alert" className="font-body text-small text-status-danger">
-            {formError}
-          </p>
-        )}
+      {formError && (
+        <p role="alert" className="font-body text-small text-status-danger">
+          {formError}
+        </p>
+      )}
 
-        <div className="flex gap-3">
-          {onCancel && (
-            <Button variant="outline" type="button" onClick={onCancel} disabled={isPending}>
-              Cancelar
-            </Button>
-          )}
-          <Button type="submit" fullWidth={!onCancel} loading={isPending}>
-            Guardar
+      <div className="flex gap-3">
+        {onCancel && (
+          <Button variant="outline" type="button" onClick={onCancel} disabled={isPending}>
+            Cancelar
           </Button>
-        </div>
-      </Card>
+        )}
+        <Button type="submit" fullWidth={!onCancel} loading={isPending}>
+          Guardar
+        </Button>
+      </div>
     </form>
   );
 }

@@ -86,6 +86,10 @@
   --shadow-lg: 0 16px 40px rgba(11, 19, 43, 0.14);
   --shadow-glow: 0 0 0 1px rgba(0, 212, 255, 0.35), 0 8px 24px rgba(0, 212, 255, 0.28);
   --shadow-glow-sm: 0 0 12px rgba(0, 212, 255, 0.55);
+  /* Sombra invertida (offset-y negativo) para barras fijas al pie —
+     ej. StageShell, que necesita separarse del contenido que scrollea
+     por encima en vez de proyectar sombra hacia abajo. */
+  --shadow-sticky-top: 0 -6px 16px rgba(11, 19, 43, 0.06);
   --ring-focus: 0 0 0 3px rgba(0, 212, 255, 0.4);
 
   /* ── Movimiento — preciso y corto, sin rebote ────────────────── */

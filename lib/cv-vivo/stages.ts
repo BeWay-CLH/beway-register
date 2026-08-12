@@ -126,3 +126,16 @@ export function getStagePosition(slug: string): { position: number; total: numbe
   const stage = WIZARD_STAGES.find((s) => s.slug === slug);
   return { position: stage ? stage.order - 1 : 0, total: WIZARD_STAGES.length };
 }
+
+// Slugs vecinos para la barra de navegación fija de StageShell
+// (BeWay Design System > ui_kits/platform/PreRegister.jsx). null en los
+// extremos: "Anterior" se deshabilita en la etapa 1, "Continuar" cae a
+// /cuenta al terminar la etapa 10.
+export function getAdjacentSlugs(slug: string): { prevSlug: string | null; nextSlug: string | null } {
+  const index = WIZARD_STAGES.findIndex((s) => s.slug === slug);
+  if (index === -1) return { prevSlug: null, nextSlug: null };
+  return {
+    prevSlug: index > 0 ? WIZARD_STAGES[index - 1].slug : null,
+    nextSlug: index < WIZARD_STAGES.length - 1 ? WIZARD_STAGES[index + 1].slug : null,
+  };
+}

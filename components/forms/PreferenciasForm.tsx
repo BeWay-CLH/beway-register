@@ -8,7 +8,8 @@ import type { z } from "zod";
 import { ArrowRight } from "lucide-react";
 import { preferencesSchema, type PreferencesInput } from "@/lib/validations/cv-vivo/preferencias";
 import { savePreferences } from "@/app/cv-vivo/preferencias/actions";
-import { Field } from "@/components/ui/Field";
+import { FieldGroup } from "@/components/cv-vivo/FieldGroup";
+import { FormField } from "@/components/cv-vivo/FormField";
 import { Select, type SelectOption } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
 import { Tag } from "@/components/ui/Tag";
@@ -76,44 +77,55 @@ export function PreferenciasForm({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-6">
-      <Field
-        label="Disponibilidad"
-        required
-        htmlFor="availabilityOptionId"
-        error={errors.availabilityOptionId?.message}
-      >
-        <Select
-          id="availabilityOptionId"
-          placeholder="Selecciona una opción"
-          options={availabilityOptions}
-          invalid={!!errors.availabilityOptionId}
-          {...register("availabilityOptionId")}
-        />
-      </Field>
+      <FieldGroup title="Disponibilidad">
+        <FormField
+          label="Disponibilidad"
+          required
+          span={6}
+          htmlFor="availabilityOptionId"
+          error={errors.availabilityOptionId?.message}
+        >
+          <Select
+            id="availabilityOptionId"
+            placeholder="Selecciona una opción"
+            options={availabilityOptions}
+            invalid={!!errors.availabilityOptionId}
+            {...register("availabilityOptionId")}
+          />
+        </FormField>
+      </FieldGroup>
 
-      <TagGroup
-        label="Tipo de oportunidad"
-        hint="Opcional. Elige todas las que apliquen."
-        options={opportunityTypes}
-        selected={opportunityTypeIds}
-        onToggle={(id) => toggle("opportunityTypeIds", opportunityTypeIds, id)}
-      />
+      <FieldGroup title="Áreas de interés" caption="Opcional">
+        <div className="col-span-12">
+          <TagGroup
+            label="Tipo de oportunidad"
+            hint="Elige todas las que apliquen."
+            options={opportunityTypes}
+            selected={opportunityTypeIds}
+            onToggle={(id) => toggle("opportunityTypeIds", opportunityTypeIds, id)}
+          />
+        </div>
 
-      <TagGroup
-        label="Modalidad de trabajo"
-        hint="Opcional. Elige todas las que apliquen."
-        options={workModalities}
-        selected={workModalityIds}
-        onToggle={(id) => toggle("workModalityIds", workModalityIds, id)}
-      />
+        <div className="col-span-12">
+          <TagGroup
+            label="Modalidad de trabajo"
+            hint="Elige todas las que apliquen."
+            options={workModalities}
+            selected={workModalityIds}
+            onToggle={(id) => toggle("workModalityIds", workModalityIds, id)}
+          />
+        </div>
 
-      <TagGroup
-        label="Sector"
-        hint="Opcional. Elige todos los que apliquen."
-        options={sectors}
-        selected={sectorIds}
-        onToggle={(id) => toggle("sectorIds", sectorIds, id)}
-      />
+        <div className="col-span-12">
+          <TagGroup
+            label="Sector"
+            hint="Elige todos los que apliquen."
+            options={sectors}
+            selected={sectorIds}
+            onToggle={(id) => toggle("sectorIds", sectorIds, id)}
+          />
+        </div>
+      </FieldGroup>
 
       {formError && (
         <p role="alert" className="font-body text-small text-status-danger">

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
-import { Plus, ArrowRight, X } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import {
   skillSchema,
   languageEntrySchema,
@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/Input";
 import { Select, type SelectOption } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
 import { Tag } from "@/components/ui/Tag";
+import { FieldGroup } from "@/components/cv-vivo/FieldGroup";
 
 export type SkillItem = { id: string; name: string };
 export type LanguageItem = { id: string; languageId: number; proficiencyLevelId: number };
@@ -30,10 +31,9 @@ type HabilidadesFormProps = {
 
 export function HabilidadesForm({ skills, languages, languageOptions, proficiencyOptions }: HabilidadesFormProps) {
   const router = useRouter();
-  const canContinue = skills.length > 0 && languages.length > 0;
 
   return (
-    <div className="flex w-full max-w-md flex-col gap-8">
+    <div className="flex flex-col gap-8">
       <SkillsSection skills={skills} onChanged={() => router.refresh()} />
       <LanguagesSection
         languages={languages}
@@ -41,11 +41,6 @@ export function HabilidadesForm({ skills, languages, languageOptions, proficienc
         proficiencyOptions={proficiencyOptions}
         onChanged={() => router.refresh()}
       />
-      {canContinue && (
-        <Button size="lg" fullWidth iconAfter={ArrowRight} onClick={() => router.push("/cv-vivo")}>
-          Continuar
-        </Button>
-      )}
     </div>
   );
 }
@@ -84,31 +79,32 @@ function SkillsSection({ skills, onChanged }: { skills: SkillItem[]; onChanged: 
   }
 
   return (
-    <div className="flex flex-col gap-3 text-left">
-      <h2 className="font-heading text-h3 text-brand-dark">Habilidades</h2>
-      {skills.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {skills.map((skill) => (
-            <Tag key={skill.id} onRemove={() => handleDelete(skill.id)}>
-              {skill.name}
-            </Tag>
-          ))}
-        </div>
-      )}
-      <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex items-start gap-2">
-        <div className="flex-1">
-          <Input placeholder="Ej. Excel, Python, diseño…" invalid={!!errors.name} {...register("name")} />
-        </div>
-        <Button type="submit" icon={Plus} loading={isPending}>
-          Agregar
-        </Button>
-      </form>
-      {(errors.name?.message ?? error) && (
-        <p role="alert" className="font-body text-small text-status-danger">
-          {errors.name?.message ?? error}
-        </p>
-      )}
-    </div>
+    <FieldGroup title="Habilidades">
+      <div className="col-span-12 flex flex-col gap-3 text-left">
+        {skills.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {skills.map((skill) => (
+              <Tag key={skill.id} onRemove={() => handleDelete(skill.id)}>
+                {skill.name}
+              </Tag>
+            ))}
+          </div>
+        )}
+        <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex items-start gap-2">
+          <div className="flex-1">
+            <Input placeholder="Ej. Excel, Python, diseño…" invalid={!!errors.name} {...register("name")} />
+          </div>
+          <Button type="submit" icon={Plus} loading={isPending}>
+            Agregar
+          </Button>
+        </form>
+        {(errors.name?.message ?? error) && (
+          <p role="alert" className="font-body text-small text-status-danger">
+            {errors.name?.message ?? error}
+          </p>
+        )}
+      </div>
+    </FieldGroup>
   );
 }
 
@@ -157,57 +153,58 @@ function LanguagesSection({
   }
 
   return (
-    <div className="flex flex-col gap-3 text-left">
-      <h2 className="font-heading text-h3 text-brand-dark">Idiomas</h2>
-      {languages.length > 0 && (
-        <ul className="flex flex-col gap-2">
-          {languages.map((lang) => (
-            <li
-              key={lang.id}
-              className="flex items-center justify-between rounded-md border border-border-subtle bg-surface-card px-4 py-2"
-            >
-              <span className="font-body text-small text-text-body">
-                {languageOptions.find((o) => o.value === lang.languageId)?.label} —{" "}
-                {proficiencyOptions.find((o) => o.value === lang.proficiencyLevelId)?.label}
-              </span>
-              <button
-                type="button"
-                onClick={() => handleDelete(lang.id)}
-                aria-label="Eliminar"
-                className="rounded-md p-1.5 text-text-muted transition-colors duration-fast ease-standard hover:bg-surface-sunken hover:text-status-danger"
+    <FieldGroup title="Idiomas">
+      <div className="col-span-12 flex flex-col gap-3 text-left">
+        {languages.length > 0 && (
+          <ul className="flex flex-col gap-2">
+            {languages.map((lang) => (
+              <li
+                key={lang.id}
+                className="flex items-center justify-between rounded-md border border-border-subtle bg-surface-card px-4 py-2"
               >
-                <X size={16} />
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-      <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-3 sm:flex-row">
-        <div className="flex-1">
-          <Select
-            placeholder="Idioma"
-            options={languageOptions}
-            invalid={!!errors.languageId}
-            {...register("languageId")}
-          />
-        </div>
-        <div className="flex-1">
-          <Select
-            placeholder="Nivel"
-            options={proficiencyOptions}
-            invalid={!!errors.proficiencyLevelId}
-            {...register("proficiencyLevelId")}
-          />
-        </div>
-        <Button type="submit" icon={Plus} loading={isPending}>
-          Agregar
-        </Button>
-      </form>
-      {(errors.languageId?.message || errors.proficiencyLevelId?.message || error) && (
-        <p role="alert" className="font-body text-small text-status-danger">
-          {errors.languageId?.message ?? errors.proficiencyLevelId?.message ?? error}
-        </p>
-      )}
-    </div>
+                <span className="font-body text-small text-text-body">
+                  {languageOptions.find((o) => o.value === lang.languageId)?.label} —{" "}
+                  {proficiencyOptions.find((o) => o.value === lang.proficiencyLevelId)?.label}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => handleDelete(lang.id)}
+                  aria-label="Eliminar"
+                  className="rounded-md p-1.5 text-text-muted transition-colors duration-fast ease-standard hover:bg-surface-sunken hover:text-status-danger"
+                >
+                  <X size={16} />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-3 sm:flex-row">
+          <div className="flex-1">
+            <Select
+              placeholder="Idioma"
+              options={languageOptions}
+              invalid={!!errors.languageId}
+              {...register("languageId")}
+            />
+          </div>
+          <div className="flex-1">
+            <Select
+              placeholder="Nivel"
+              options={proficiencyOptions}
+              invalid={!!errors.proficiencyLevelId}
+              {...register("proficiencyLevelId")}
+            />
+          </div>
+          <Button type="submit" icon={Plus} loading={isPending}>
+            Agregar
+          </Button>
+        </form>
+        {(errors.languageId?.message || errors.proficiencyLevelId?.message || error) && (
+          <p role="alert" className="font-body text-small text-status-danger">
+            {errors.languageId?.message ?? errors.proficiencyLevelId?.message ?? error}
+          </p>
+        )}
+      </div>
+    </FieldGroup>
   );
 }

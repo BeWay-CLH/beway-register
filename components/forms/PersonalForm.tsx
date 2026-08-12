@@ -8,9 +8,10 @@ import type { z } from "zod";
 import { ArrowRight } from "lucide-react";
 import { personalSchema, type PersonalInput } from "@/lib/validations/cv-vivo/personal";
 import { savePersonal } from "@/app/cv-vivo/personal/actions";
-import { Field } from "@/components/ui/Field";
 import { Select, type SelectOption } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
+import { FieldGroup } from "@/components/cv-vivo/FieldGroup";
+import { FormField } from "@/components/cv-vivo/FormField";
 import { PhoneField } from "@/components/forms/PhoneField";
 
 type PersonalFormValues = z.input<typeof personalSchema>;
@@ -52,25 +53,27 @@ export function PersonalForm({ academicStatuses, countries, defaultValues }: Per
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-5">
-      <Field label="Teléfono" htmlFor="phone" hint="Opcional. Lo usan las empresas para contactarte.">
-        <PhoneField
-          countries={countries}
-          countryFieldProps={register("phoneCountryId")}
-          numberFieldProps={register("phone")}
-          invalidNumber={!!errors.phone}
-        />
-      </Field>
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-6">
+      <FieldGroup title="Contacto">
+        <FormField label="Teléfono" span={7} hint="Opcional. Lo usan las empresas para contactarte." htmlFor="phone">
+          <PhoneField
+            countries={countries}
+            countryFieldProps={register("phoneCountryId")}
+            numberFieldProps={register("phone")}
+            invalidNumber={!!errors.phone}
+          />
+        </FormField>
 
-      <Field label="Situación académica" required htmlFor="academicStatusId" error={errors.academicStatusId?.message}>
-        <Select
-          id="academicStatusId"
-          placeholder="Selecciona una opción"
-          options={academicStatuses}
-          invalid={!!errors.academicStatusId}
-          {...register("academicStatusId")}
-        />
-      </Field>
+        <FormField label="Situación académica" required span={5} htmlFor="academicStatusId" error={errors.academicStatusId?.message}>
+          <Select
+            id="academicStatusId"
+            placeholder="Selecciona una opción"
+            options={academicStatuses}
+            invalid={!!errors.academicStatusId}
+            {...register("academicStatusId")}
+          />
+        </FormField>
+      </FieldGroup>
 
       {formError && (
         <p role="alert" className="font-body text-small text-status-danger">

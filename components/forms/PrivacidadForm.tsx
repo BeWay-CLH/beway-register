@@ -11,7 +11,8 @@ import {
   type PrivacySettingsInput,
 } from "@/lib/validations/cv-vivo/privacidad";
 import { savePrivacySettings } from "@/app/cv-vivo/privacidad/actions";
-import { Field } from "@/components/ui/Field";
+import { FieldGroup } from "@/components/cv-vivo/FieldGroup";
+import { FormField } from "@/components/cv-vivo/FormField";
 import { Select } from "@/components/ui/Select";
 import { Switch } from "@/components/ui/Switch";
 import { Button } from "@/components/ui/Button";
@@ -48,24 +49,31 @@ export function PrivacidadForm({ defaultValues }: PrivacidadFormProps) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-6">
-      <Field
-        label="¿Quién puede ver tu perfil?"
-        required
-        htmlFor="profileVisibility"
-        error={errors.profileVisibility?.message}
-      >
-        <Select
-          id="profileVisibility"
-          options={PROFILE_VISIBILITY_OPTIONS}
-          invalid={!!errors.profileVisibility}
-          {...register("profileVisibility")}
-        />
-      </Field>
+      <FieldGroup title="Visibilidad del perfil">
+        <FormField
+          label="¿Quién puede ver tu perfil?"
+          required
+          span={7}
+          htmlFor="profileVisibility"
+          error={errors.profileVisibility?.message}
+        >
+          <Select
+            id="profileVisibility"
+            options={PROFILE_VISIBILITY_OPTIONS}
+            invalid={!!errors.profileVisibility}
+            {...register("profileVisibility")}
+          />
+        </FormField>
+      </FieldGroup>
 
-      <div className="flex flex-col gap-4">
-        <Switch label="Mostrar mi correo a las empresas" {...register("showContactEmail")} />
-        <Switch label="Mostrar mi teléfono a las empresas" {...register("showContactPhone")} />
-      </div>
+      <FieldGroup title="Contacto" caption="Opcional">
+        <div className="col-span-12">
+          <Switch label="Mostrar mi correo a las empresas" {...register("showContactEmail")} />
+        </div>
+        <div className="col-span-12">
+          <Switch label="Mostrar mi teléfono a las empresas" {...register("showContactPhone")} />
+        </div>
+      </FieldGroup>
 
       {formError && (
         <p role="alert" className="font-body text-small text-status-danger">

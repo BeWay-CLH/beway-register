@@ -2,15 +2,13 @@ import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/cv-vivo/get-current-profile";
 import { createClient } from "@/lib/supabase/server";
 import { getCatalog } from "@/lib/catalogs";
-import { getStagePosition } from "@/lib/cv-vivo/stages";
 import { ExperienciaForm, type ExperienceEntry } from "@/components/forms/ExperienciaForm";
-import { SectionLabel } from "@/components/ui/SectionLabel";
+import { StageShell } from "@/components/cv-vivo/StageShell";
 
 export default async function ExperienciaPage() {
   const profile = await getCurrentProfile();
   if (!profile) redirect("/iniciar-sesion");
 
-  const { position, total } = getStagePosition("experiencia");
   const supabase = await createClient();
   const [{ data: rows }, experienceTypes, sectors] = await Promise.all([
     supabase
@@ -35,22 +33,17 @@ export default async function ExperienciaPage() {
   }));
 
   return (
-    <div className="flex w-full max-w-md flex-col gap-6">
-      <SectionLabel>
-        Etapa {position} de {total}
-      </SectionLabel>
-      <div>
-        <h1 className="font-heading text-h1 text-brand-dark">Experiencia</h1>
-        <p className="mt-2 font-body text-body text-text-muted">
-          Muestra a las empresas el tipo de trabajo que ya has hecho, aunque sea poco. Hasta 3
-          experiencias laborales, prácticas o freelance.
-        </p>
-      </div>
+    <StageShell
+      slug="experiencia"
+      title="Experiencia"
+      description="Muestra a las empresas el tipo de trabajo que ya has hecho, aunque sea poco. Hasta 3 experiencias laborales, prácticas o freelance."
+      whyText="Tu experiencia permite emparejarte con internships y programas de empleo que valoran candidatos con aplicación práctica en el mundo real. Puedes editarla en cualquier momento desde tu perfil."
+    >
       <ExperienciaForm
         entries={entries}
         experienceTypes={experienceTypes.map((t) => ({ value: t.id, label: t.name }))}
         sectors={sectors.map((s) => ({ value: s.id, label: s.name }))}
       />
-    </div>
+    </StageShell>
   );
 }

@@ -5,17 +5,20 @@ import { useRouter } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
-import { Plus, Pencil, Trash2, ArrowRight } from "lucide-react";
+import { clsx } from "clsx";
+import { Plus, GraduationCap } from "lucide-react";
 import { educationEntrySchema, type EducationEntryInput } from "@/lib/validations/cv-vivo/educacion";
 import { saveEducationEntry, deleteEducationEntry } from "@/app/cv-vivo/educacion/actions";
-import { Card } from "@/components/ui/Card";
-import { Field } from "@/components/ui/Field";
 import { Input } from "@/components/ui/Input";
 import { Select, type SelectOption } from "@/components/ui/Select";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { Textarea } from "@/components/ui/Textarea";
 import { Button } from "@/components/ui/Button";
 import { LoadingRow } from "@/components/ui/LoadingRow";
+import { FieldLabel } from "@/components/ui/FieldLabel";
+import { FieldGroup } from "@/components/cv-vivo/FieldGroup";
+import { FormField } from "@/components/cv-vivo/FormField";
+import { EntryRow } from "@/components/cv-vivo/EntryRow";
 import { UniversitySelect } from "@/components/forms/UniversitySelect";
 
 export type EducationEntry = {
@@ -79,20 +82,25 @@ export function EducacionForm({ entries, countries, studyFields, academicStatuse
   }
 
   return (
-    <div className="flex w-full max-w-md flex-col gap-6">
+    <div className="flex flex-col gap-6">
       {entries.length > 0 && (
-        <ul className="flex flex-col gap-3">
-          {entries.map((entry) => (
-            <EntryCard
-              key={entry.id}
-              entry={entry}
-              studyFields={studyFields}
-              onEdit={() => setEditingId(entry.id)}
-              onDelete={() => handleDelete(entry.id)}
-              disabled={isRefreshing}
-            />
-          ))}
-        </ul>
+        <div className="flex flex-col gap-3">
+          <FieldLabel>Ya añadido · {entries.length}</FieldLabel>
+          {entries.map((entry) => {
+            const studyFieldName = studyFields.find((s) => s.value === entry.studyFieldId)?.label ?? "Carrera";
+            return (
+              <EntryRow
+                key={entry.id}
+                icon={GraduationCap}
+                title={studyFieldName}
+                meta={`${entry.universityName ?? "Universidad"} · ${formatDateRange(entry.startDate, entry.endDate, entry.isCurrent)}`}
+                onEdit={() => setEditingId(entry.id)}
+                onDelete={() => handleDelete(entry.id)}
+                disabled={isRefreshing}
+              />
+            );
+          })}
+        </div>
       )}
 
       {isRefreshing && <LoadingRow />}
@@ -119,63 +127,7 @@ export function EducacionForm({ entries, countries, studyFields, academicStatuse
           Agregar otra educación
         </Button>
       )}
-
-      {entries.length > 0 && !editingId && (
-        <Button size="lg" fullWidth iconAfter={ArrowRight} onClick={() => router.push("/cv-vivo")}>
-          Continuar
-        </Button>
-      )}
     </div>
-  );
-}
-
-function EntryCard({
-  entry,
-  studyFields,
-  onEdit,
-  onDelete,
-  disabled,
-}: {
-  entry: EducationEntry;
-  studyFields: SelectOption[];
-  onEdit: () => void;
-  onDelete: () => void;
-  disabled: boolean;
-}) {
-  const studyFieldName = studyFields.find((s) => s.value === entry.studyFieldId)?.label ?? "Carrera";
-
-  return (
-    <li>
-      <Card elevation="sm" className="flex items-start justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <p className="font-body text-body font-semibold text-text-body">{studyFieldName}</p>
-          <p className="font-body text-small text-text-muted">{entry.universityName ?? "Universidad"}</p>
-          <p className="font-body text-small text-text-muted">
-            {formatDateRange(entry.startDate, entry.endDate, entry.isCurrent)}
-          </p>
-        </div>
-        <div className="flex shrink-0 gap-1">
-          <button
-            type="button"
-            onClick={onEdit}
-            disabled={disabled}
-            aria-label="Editar"
-            className="rounded-md p-2 text-text-muted transition-colors duration-fast ease-standard hover:bg-surface-sunken hover:text-text-body disabled:cursor-not-allowed disabled:opacity-45"
-          >
-            <Pencil size={16} />
-          </button>
-          <button
-            type="button"
-            onClick={onDelete}
-            disabled={disabled}
-            aria-label="Eliminar"
-            className="rounded-md p-2 text-text-muted transition-colors duration-fast ease-standard hover:bg-surface-sunken hover:text-status-danger disabled:cursor-not-allowed disabled:opacity-45"
-          >
-            <Trash2 size={16} />
-          </button>
-        </div>
-      </Card>
-    </li>
   );
 }
 
@@ -246,9 +198,9 @@ function EntryForm({
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate>
-      <Card elevation="sm" className="flex flex-col gap-5">
-        <Field label="País de la institución" htmlFor="entryCountryId" hint="Para filtrar la lista de universidades.">
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-6">
+      <FieldGroup title="Institución">
+        <FormField label="País de la institución" span={5} hint="Filtra la lista de universidades." htmlFor="entryCountryId">
           <Select
             id="entryCountryId"
             placeholder="Selecciona un país"
@@ -256,8 +208,8 @@ function EntryForm({
             value={countryId ?? ""}
             onChange={(event) => setCountryId(event.target.value || null)}
           />
-        </Field>
-        <Field label="Universidad" required htmlFor="universityId" error={errors.universityId?.message}>
+        </FormField>
+        <FormField label="Universidad o centro" span={7} required htmlFor="universityId" error={errors.universityId?.message}>
           <UniversitySelect
             id="universityId"
             control={control}
@@ -266,8 +218,8 @@ function EntryForm({
             countryId={countryId}
             invalid={!!errors.universityId}
           />
-        </Field>
-        <Field label="Carrera" required htmlFor="studyFieldId" error={errors.studyFieldId?.message}>
+        </FormField>
+        <FormField label="Carrera" span={7} required htmlFor="studyFieldId" error={errors.studyFieldId?.message}>
           <Select
             id="studyFieldId"
             placeholder="Selecciona tu carrera"
@@ -275,9 +227,10 @@ function EntryForm({
             invalid={!!errors.studyFieldId}
             {...register("studyFieldId")}
           />
-        </Field>
-        <Field
+        </FormField>
+        <FormField
           label="Situación académica"
+          span={5}
           required
           htmlFor="academicStatusId"
           error={errors.academicStatusId?.message}
@@ -289,37 +242,45 @@ function EntryForm({
             invalid={!!errors.academicStatusId}
             {...register("academicStatusId")}
           />
-        </Field>
-        <Field label="Fecha de inicio" required htmlFor="startDate" error={errors.startDate?.message}>
+        </FormField>
+      </FieldGroup>
+
+      <FieldGroup title="Periodo">
+        <FormField label="Fecha de inicio" span={4} required htmlFor="startDate" error={errors.startDate?.message}>
           <Input id="startDate" type="date" invalid={!!errors.startDate} {...register("startDate")} />
-        </Field>
-        <Checkbox label="Actualmente estudio aquí" {...register("isCurrent")} />
+        </FormField>
         {!isCurrent && (
-          <Field label="Fecha de fin" htmlFor="endDate" error={errors.endDate?.message}>
+          <FormField label="Fecha de fin" span={4} htmlFor="endDate" error={errors.endDate?.message}>
             <Input id="endDate" type="date" invalid={!!errors.endDate} {...register("endDate")} />
-          </Field>
+          </FormField>
         )}
-        <Field label="Descripción" htmlFor="description" hint="Opcional." error={errors.description?.message}>
-          <Textarea id="description" rows={3} invalid={!!errors.description} {...register("description")} />
-        </Field>
-
-        {formError && (
-          <p role="alert" className="font-body text-small text-status-danger">
-            {formError}
-          </p>
-        )}
-
-        <div className="flex gap-3">
-          {onCancel && (
-            <Button variant="outline" type="button" onClick={onCancel} disabled={isPending}>
-              Cancelar
-            </Button>
-          )}
-          <Button type="submit" fullWidth={!onCancel} loading={isPending}>
-            Guardar
-          </Button>
+        <div className={clsx("col-span-12 flex items-end pb-2.5", isCurrent ? "sm:col-span-8" : "sm:col-span-4")}>
+          <Checkbox label="Actualmente estudio aquí" {...register("isCurrent")} />
         </div>
-      </Card>
+      </FieldGroup>
+
+      <FieldGroup title="Detalle" caption="Opcional">
+        <FormField label="Descripción" span={12} hint="Máximo 500 caracteres." htmlFor="description" error={errors.description?.message}>
+          <Textarea id="description" rows={3} invalid={!!errors.description} {...register("description")} />
+        </FormField>
+      </FieldGroup>
+
+      {formError && (
+        <p role="alert" className="font-body text-small text-status-danger">
+          {formError}
+        </p>
+      )}
+
+      <div className="flex gap-3">
+        {onCancel && (
+          <Button variant="outline" type="button" onClick={onCancel} disabled={isPending}>
+            Cancelar
+          </Button>
+        )}
+        <Button type="submit" fullWidth={!onCancel} loading={isPending}>
+          Guardar
+        </Button>
+      </div>
     </form>
   );
 }

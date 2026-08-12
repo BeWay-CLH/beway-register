@@ -5,18 +5,21 @@ import { useRouter } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
-import { Plus, Pencil, Trash2, ArrowRight } from "lucide-react";
+import { clsx } from "clsx";
+import { Plus, Briefcase } from "lucide-react";
 import { experienceEntrySchema, type ExperienceEntryInput } from "@/lib/validations/cv-vivo/experiencia";
 import { saveExperienceEntry, deleteExperienceEntry } from "@/app/cv-vivo/experiencia/actions";
 import { MAX_REPEATABLE_ENTRIES } from "@/lib/cv-vivo/limits";
-import { Card } from "@/components/ui/Card";
-import { Field } from "@/components/ui/Field";
 import { Input } from "@/components/ui/Input";
 import { Select, type SelectOption } from "@/components/ui/Select";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { Textarea } from "@/components/ui/Textarea";
 import { Button } from "@/components/ui/Button";
 import { LoadingRow } from "@/components/ui/LoadingRow";
+import { FieldLabel } from "@/components/ui/FieldLabel";
+import { FieldGroup } from "@/components/cv-vivo/FieldGroup";
+import { FormField } from "@/components/cv-vivo/FormField";
+import { EntryRow } from "@/components/cv-vivo/EntryRow";
 
 export type ExperienceEntry = {
   id: string;
@@ -70,19 +73,22 @@ export function ExperienciaForm({ entries, experienceTypes, sectors }: Experienc
   }
 
   return (
-    <div className="flex w-full max-w-md flex-col gap-6">
+    <div className="flex flex-col gap-6">
       {entries.length > 0 && (
-        <ul className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3">
+          <FieldLabel>Ya añadido · {entries.length}</FieldLabel>
           {entries.map((entry) => (
-            <EntryCard
+            <EntryRow
               key={entry.id}
-              entry={entry}
+              icon={Briefcase}
+              title={entry.roleTitle}
+              meta={`${entry.companyName} · ${formatDateRange(entry.startDate, entry.endDate, entry.isCurrent)}`}
               onEdit={() => setEditingId(entry.id)}
               onDelete={() => handleDelete(entry.id)}
               disabled={isRefreshing}
             />
           ))}
-        </ul>
+        </div>
       )}
 
       {isRefreshing && <LoadingRow />}
@@ -111,61 +117,10 @@ export function ExperienciaForm({ entries, experienceTypes, sectors }: Experienc
           Agregar otra experiencia
         </Button>
       )}
-
-      {entries.length > 0 && !editingId && (
-        <Button size="lg" fullWidth iconAfter={ArrowRight} onClick={() => router.push("/cv-vivo")}>
-          Continuar
-        </Button>
-      )}
     </div>
   );
 }
 
-function EntryCard({
-  entry,
-  onEdit,
-  onDelete,
-  disabled,
-}: {
-  entry: ExperienceEntry;
-  onEdit: () => void;
-  onDelete: () => void;
-  disabled: boolean;
-}) {
-  return (
-    <li>
-      <Card elevation="sm" className="flex items-start justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <p className="font-body text-body font-semibold text-text-body">{entry.roleTitle}</p>
-          <p className="font-body text-small text-text-muted">{entry.companyName}</p>
-          <p className="font-body text-small text-text-muted">
-            {formatDateRange(entry.startDate, entry.endDate, entry.isCurrent)}
-          </p>
-        </div>
-        <div className="flex shrink-0 gap-1">
-          <button
-            type="button"
-            onClick={onEdit}
-            disabled={disabled}
-            aria-label="Editar"
-            className="rounded-md p-2 text-text-muted transition-colors duration-fast ease-standard hover:bg-surface-sunken hover:text-text-body disabled:cursor-not-allowed disabled:opacity-45"
-          >
-            <Pencil size={16} />
-          </button>
-          <button
-            type="button"
-            onClick={onDelete}
-            disabled={disabled}
-            aria-label="Eliminar"
-            className="rounded-md p-2 text-text-muted transition-colors duration-fast ease-standard hover:bg-surface-sunken hover:text-status-danger disabled:cursor-not-allowed disabled:opacity-45"
-          >
-            <Trash2 size={16} />
-          </button>
-        </div>
-      </Card>
-    </li>
-  );
-}
 
 function formatDateRange(startDate: string | null, endDate: string | null, isCurrent: boolean) {
   const format = (value: string) => new Date(value).toLocaleDateString("es-ES", { month: "short", year: "numeric" });
@@ -227,16 +182,17 @@ function EntryForm({
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate>
-      <Card elevation="sm" className="flex flex-col gap-5">
-        <Field label="Empresa" required htmlFor="companyName" error={errors.companyName?.message}>
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-6">
+      <FieldGroup title="Empresa">
+        <FormField label="Empresa" span={7} required htmlFor="companyName" error={errors.companyName?.message}>
           <Input id="companyName" invalid={!!errors.companyName} {...register("companyName")} />
-        </Field>
-        <Field label="Puesto" required htmlFor="roleTitle" error={errors.roleTitle?.message}>
+        </FormField>
+        <FormField label="Puesto" span={5} required htmlFor="roleTitle" error={errors.roleTitle?.message}>
           <Input id="roleTitle" invalid={!!errors.roleTitle} {...register("roleTitle")} />
-        </Field>
-        <Field
+        </FormField>
+        <FormField
           label="Tipo de experiencia"
+          span={6}
           required
           htmlFor="experienceTypeId"
           error={errors.experienceTypeId?.message}
@@ -248,8 +204,8 @@ function EntryForm({
             invalid={!!errors.experienceTypeId}
             {...register("experienceTypeId")}
           />
-        </Field>
-        <Field label="Sector" htmlFor="sectorId" hint="Opcional." error={errors.sectorId?.message}>
+        </FormField>
+        <FormField label="Sector" span={6} htmlFor="sectorId" error={errors.sectorId?.message}>
           <Select
             id="sectorId"
             placeholder="Selecciona una opción"
@@ -257,37 +213,45 @@ function EntryForm({
             invalid={!!errors.sectorId}
             {...register("sectorId")}
           />
-        </Field>
-        <Field label="Fecha de inicio" required htmlFor="startDate" error={errors.startDate?.message}>
+        </FormField>
+      </FieldGroup>
+
+      <FieldGroup title="Periodo">
+        <FormField label="Fecha de inicio" span={4} required htmlFor="startDate" error={errors.startDate?.message}>
           <Input id="startDate" type="date" invalid={!!errors.startDate} {...register("startDate")} />
-        </Field>
-        <Checkbox label="Actualmente trabajo aquí" {...register("isCurrent")} />
+        </FormField>
         {!isCurrent && (
-          <Field label="Fecha de fin" htmlFor="endDate" error={errors.endDate?.message}>
+          <FormField label="Fecha de fin" span={4} htmlFor="endDate" error={errors.endDate?.message}>
             <Input id="endDate" type="date" invalid={!!errors.endDate} {...register("endDate")} />
-          </Field>
+          </FormField>
         )}
-        <Field label="Descripción" htmlFor="description" hint="Opcional." error={errors.description?.message}>
-          <Textarea id="description" rows={3} invalid={!!errors.description} {...register("description")} />
-        </Field>
-
-        {formError && (
-          <p role="alert" className="font-body text-small text-status-danger">
-            {formError}
-          </p>
-        )}
-
-        <div className="flex gap-3">
-          {onCancel && (
-            <Button variant="outline" type="button" onClick={onCancel} disabled={isPending}>
-              Cancelar
-            </Button>
-          )}
-          <Button type="submit" fullWidth={!onCancel} loading={isPending}>
-            Guardar
-          </Button>
+        <div className={clsx("col-span-12 flex items-end pb-2.5", isCurrent ? "sm:col-span-8" : "sm:col-span-4")}>
+          <Checkbox label="Actualmente trabajo aquí" {...register("isCurrent")} />
         </div>
-      </Card>
+      </FieldGroup>
+
+      <FieldGroup title="Detalle" caption="Opcional">
+        <FormField label="Descripción" span={12} htmlFor="description" error={errors.description?.message}>
+          <Textarea id="description" rows={3} invalid={!!errors.description} {...register("description")} />
+        </FormField>
+      </FieldGroup>
+
+      {formError && (
+        <p role="alert" className="font-body text-small text-status-danger">
+          {formError}
+        </p>
+      )}
+
+      <div className="flex gap-3">
+        {onCancel && (
+          <Button variant="outline" type="button" onClick={onCancel} disabled={isPending}>
+            Cancelar
+          </Button>
+        )}
+        <Button type="submit" fullWidth={!onCancel} loading={isPending}>
+          Guardar
+        </Button>
+      </div>
     </form>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
 import { User, Mail, ArrowRight } from "lucide-react";
@@ -16,19 +16,18 @@ import { Checkbox } from "@/components/ui/Checkbox";
 import { Switch } from "@/components/ui/Switch";
 import { Button } from "@/components/ui/Button";
 import { Turnstile } from "@/components/forms/Turnstile";
+import { UniversitySelect } from "@/components/forms/UniversitySelect";
 
 type RegistroFormValues = z.input<typeof registroSchema>;
 
 type RegistroFormProps = {
   countries: SelectOption[];
-  universities: SelectOption[];
   studyFields: SelectOption[];
   referralSources: SelectOption[];
 };
 
 export function RegistroForm({
   countries,
-  universities,
   studyFields,
   referralSources,
 }: RegistroFormProps) {
@@ -42,6 +41,7 @@ export function RegistroForm({
     handleSubmit,
     setValue,
     setError,
+    control,
     formState: { errors },
   } = useForm<RegistroFormValues, unknown, RegistroInput>({
     resolver: zodResolver(registroSchema),
@@ -55,6 +55,8 @@ export function RegistroForm({
       marketingConsent: false,
     },
   });
+
+  const countryId = useWatch({ control, name: "countryId" });
 
   function onSubmit(data: RegistroInput) {
     setFormError(null);
@@ -151,12 +153,13 @@ export function RegistroForm({
         </Field>
 
         <Field label="Universidad" required htmlFor="universityId" error={errors.universityId?.message}>
-          <Select
+          <UniversitySelect
             id="universityId"
-            placeholder="Selecciona tu universidad"
-            options={universities}
+            control={control}
+            setValue={setValue}
+            name="universityId"
+            countryId={countryId}
             invalid={!!errors.universityId}
-            {...register("universityId")}
           />
         </Field>
 
@@ -216,7 +219,7 @@ export function RegistroForm({
           </p>
         )}
 
-        <Button type="submit" size="lg" fullWidth iconAfter={ArrowRight} disabled={isPending}>
+        <Button type="submit" size="lg" fullWidth iconAfter={ArrowRight} loading={isPending}>
           {isPending ? "Creando cuenta…" : "Crear mi perfil"}
         </Button>
       </form>

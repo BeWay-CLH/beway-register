@@ -8,19 +8,21 @@ import type { z } from "zod";
 import { ArrowRight } from "lucide-react";
 import { personalSchema, type PersonalInput } from "@/lib/validations/cv-vivo/personal";
 import { savePersonal } from "@/app/cv-vivo/personal/actions";
-import { Field } from "@/components/ui/Field";
-import { Input } from "@/components/ui/Input";
 import { Select, type SelectOption } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
+import { FieldGroup } from "@/components/cv-vivo/FieldGroup";
+import { FormField } from "@/components/cv-vivo/FormField";
+import { PhoneField } from "@/components/forms/PhoneField";
 
 type PersonalFormValues = z.input<typeof personalSchema>;
 
 type PersonalFormProps = {
   academicStatuses: SelectOption[];
-  defaultValues: { phone: string; academicStatusId: number | undefined };
+  countries: SelectOption[];
+  defaultValues: { phoneCountryId: string; phone: string; academicStatusId: number | undefined };
 };
 
-export function PersonalForm({ academicStatuses, defaultValues }: PersonalFormProps) {
+export function PersonalForm({ academicStatuses, countries, defaultValues }: PersonalFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [formError, setFormError] = useState<string | null>(null);
@@ -32,6 +34,7 @@ export function PersonalForm({ academicStatuses, defaultValues }: PersonalFormPr
   } = useForm<PersonalFormValues, unknown, PersonalInput>({
     resolver: zodResolver(personalSchema),
     defaultValues: {
+      phoneCountryId: defaultValues.phoneCountryId,
       phone: defaultValues.phone,
       academicStatusId: defaultValues.academicStatusId,
     },
@@ -50,20 +53,27 @@ export function PersonalForm({ academicStatuses, defaultValues }: PersonalFormPr
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-5">
-      <Field label="Teléfono" htmlFor="phone" hint="Opcional. Lo usan las empresas para contactarte.">
-        <Input id="phone" type="tel" autoComplete="tel" {...register("phone")} />
-      </Field>
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-6">
+      <FieldGroup title="Contacto">
+        <FormField label="Teléfono" span={7} hint="Opcional. Lo usan las empresas para contactarte." htmlFor="phone">
+          <PhoneField
+            countries={countries}
+            countryFieldProps={register("phoneCountryId")}
+            numberFieldProps={register("phone")}
+            invalidNumber={!!errors.phone}
+          />
+        </FormField>
 
-      <Field label="Situación académica" required htmlFor="academicStatusId" error={errors.academicStatusId?.message}>
-        <Select
-          id="academicStatusId"
-          placeholder="Selecciona una opción"
-          options={academicStatuses}
-          invalid={!!errors.academicStatusId}
-          {...register("academicStatusId")}
-        />
-      </Field>
+        <FormField label="Situación académica" required span={5} htmlFor="academicStatusId" error={errors.academicStatusId?.message}>
+          <Select
+            id="academicStatusId"
+            placeholder="Selecciona una opción"
+            options={academicStatuses}
+            invalid={!!errors.academicStatusId}
+            {...register("academicStatusId")}
+          />
+        </FormField>
+      </FieldGroup>
 
       {formError && (
         <p role="alert" className="font-body text-small text-status-danger">
@@ -71,8 +81,8 @@ export function PersonalForm({ academicStatuses, defaultValues }: PersonalFormPr
         </p>
       )}
 
-      <Button type="submit" size="lg" fullWidth iconAfter={ArrowRight} disabled={isPending}>
-        {isPending ? "Guardando…" : "Guardar y continuar"}
+      <Button type="submit" size="lg" fullWidth iconAfter={ArrowRight} loading={isPending}>
+        Guardar y continuar
       </Button>
     </form>
   );

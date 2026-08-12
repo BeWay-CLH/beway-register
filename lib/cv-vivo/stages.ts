@@ -2,6 +2,23 @@ import type { Database } from "@/lib/supabase/database.types";
 
 export type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
 
+// Contexto para calcular completitud. profiles alcanza para las etapas 2-3,
+// pero desde la etapa 4 la completitud depende de tablas hijas (education,
+// experiences, etc.) — cada una agrega su propia señal aquí cuando se
+// implementa, en vez de rediseñar esto de una vez para las 10 etapas.
+export type WizardContext = {
+  profile: ProfileRow;
+  hasEducation: boolean;
+  hasExperience: boolean;
+  hasProjects: boolean;
+  hasSkills: boolean;
+  hasLanguages: boolean;
+  hasCertifications: boolean;
+  hasPreferences: boolean;
+  hasEvidences: boolean;
+  hasPrivacySettings: boolean;
+};
+
 export type WizardStage = {
   slug: string;
   order: number;
@@ -9,7 +26,7 @@ export type WizardStage = {
   description: string;
   /** false = ruta ya existe (aparece en el stepper) pero aún es un stub. */
   implemented: boolean;
-  isComplete: (profile: ProfileRow) => boolean;
+  isComplete: (ctx: WizardContext) => boolean;
 };
 
 // Etapas 2-11 del CV Vivo (CLAUDE.md > Modelo de datos). El Paso 1
@@ -24,7 +41,7 @@ export const WIZARD_STAGES: WizardStage[] = [
     label: "Información personal",
     description: "Tu teléfono y situación académica actual.",
     implemented: true,
-    isComplete: (profile) => profile.academic_status_id !== null,
+    isComplete: (ctx) => ctx.profile.academic_status_id !== null,
   },
   {
     slug: "presentacion",
@@ -32,70 +49,93 @@ export const WIZARD_STAGES: WizardStage[] = [
     label: "Presentación",
     description: "Un titular y una breve descripción de ti.",
     implemented: true,
-    isComplete: (profile) => Boolean(profile.headline),
+    isComplete: (ctx) => Boolean(ctx.profile.headline),
   },
   {
     slug: "educacion",
     order: 4,
     label: "Educación",
     description: "Tu formación académica.",
-    implemented: false,
-    isComplete: () => false,
+    implemented: true,
+    isComplete: (ctx) => ctx.hasEducation,
   },
   {
     slug: "experiencia",
     order: 5,
     label: "Experiencia",
     description: "Hasta 3 experiencias laborales.",
-    implemented: false,
-    isComplete: () => false,
+    implemented: true,
+    isComplete: (ctx) => ctx.hasExperience,
   },
   {
     slug: "proyectos",
     order: 6,
     label: "Proyectos y actividades",
     description: "Hasta 3 proyectos o actividades.",
-    implemented: false,
-    isComplete: () => false,
+    implemented: true,
+    isComplete: (ctx) => ctx.hasProjects,
   },
   {
     slug: "habilidades",
     order: 7,
     label: "Habilidades e idiomas",
     description: "Tus habilidades e idiomas.",
-    implemented: false,
-    isComplete: () => false,
+    implemented: true,
+    isComplete: (ctx) => ctx.hasSkills && ctx.hasLanguages,
   },
   {
     slug: "certificaciones",
     order: 8,
     label: "Formación complementaria",
     description: "Hasta 3 cursos, certificaciones o talleres.",
-    implemented: false,
-    isComplete: () => false,
+    implemented: true,
+    isComplete: (ctx) => ctx.hasCertifications,
   },
   {
     slug: "preferencias",
     order: 9,
     label: "Preferencias profesionales",
     description: "Qué tipo de oportunidades buscas.",
-    implemented: false,
-    isComplete: () => false,
+    implemented: true,
+    isComplete: (ctx) => ctx.hasPreferences,
   },
   {
     slug: "evidencias",
     order: 10,
     label: "Evidencias",
     description: "Enlaces a tu portafolio, GitHub u otros.",
-    implemented: false,
-    isComplete: () => false,
+    implemented: true,
+    isComplete: (ctx) => ctx.hasEvidences,
   },
   {
     slug: "privacidad",
     order: 11,
     label: "Privacidad",
     description: "Quién puede ver tu perfil y tus datos de contacto.",
-    implemented: false,
-    isComplete: () => false,
+    implemented: true,
+    isComplete: (ctx) => ctx.hasPrivacySettings,
   },
 ];
+
+// Posición dentro del wizard (1-10) — distinta de `order` (2-11), que es la
+// numeración de CLAUDE.md que incluye el Paso 1 (registro, fuera del
+// wizard). Los encabezados de cada etapa muestran esta posición, nunca
+// `order` directamente, para no confundir al usuario con una etapa 1 que
+// nunca ve dentro de /cv-vivo.
+export function getStagePosition(slug: string): { position: number; total: number } {
+  const stage = WIZARD_STAGES.find((s) => s.slug === slug);
+  return { position: stage ? stage.order - 1 : 0, total: WIZARD_STAGES.length };
+}
+
+// Slugs vecinos para la barra de navegación fija de StageShell
+// (BeWay Design System > ui_kits/platform/PreRegister.jsx). null en los
+// extremos: "Anterior" se deshabilita en la etapa 1, "Continuar" cae a
+// /cuenta al terminar la etapa 10.
+export function getAdjacentSlugs(slug: string): { prevSlug: string | null; nextSlug: string | null } {
+  const index = WIZARD_STAGES.findIndex((s) => s.slug === slug);
+  if (index === -1) return { prevSlug: null, nextSlug: null };
+  return {
+    prevSlug: index > 0 ? WIZARD_STAGES[index - 1].slug : null,
+    nextSlug: index < WIZARD_STAGES.length - 1 ? WIZARD_STAGES[index + 1].slug : null,
+  };
+}

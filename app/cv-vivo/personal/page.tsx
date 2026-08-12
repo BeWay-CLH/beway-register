@@ -2,27 +2,36 @@ import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/cv-vivo/get-current-profile";
 import { getCatalog } from "@/lib/catalogs";
 import { PersonalForm } from "@/components/forms/PersonalForm";
-import { SectionLabel } from "@/components/ui/SectionLabel";
+import { StageShell } from "@/components/cv-vivo/StageShell";
 
 export default async function PersonalPage() {
   const profile = await getCurrentProfile();
-  if (!profile) redirect("/registro");
+  if (!profile) redirect("/iniciar-sesion");
 
-  const academicStatuses = await getCatalog("academic_status");
+  const [academicStatuses, countries] = await Promise.all([
+    getCatalog("academic_status"),
+    getCatalog("countries"),
+  ]);
 
   return (
-    <div className="flex w-full max-w-md flex-col gap-6">
-      <SectionLabel>Etapa 2 de 10</SectionLabel>
-      <div>
-        <h1 className="font-heading text-h1 text-brand-dark">Información personal</h1>
-        <p className="mt-2 font-body text-body text-text-muted">
-          Nos ayuda a que las empresas sepan cómo contactarte y en qué punto de tu formación estás.
-        </p>
-      </div>
+    <StageShell
+      slug="personal"
+      title="Información personal"
+      description="Nos ayuda a que las empresas sepan cómo contactarte y en qué punto de tu formación estás."
+      whyText="Necesitamos tu teléfono para que las empresas puedan contactarte. Tu situación académica nos ayuda a encontrar oportunidades que se ajusten a tu etapa formativa."
+    >
       <PersonalForm
         academicStatuses={academicStatuses.map((a) => ({ value: a.id, label: a.name }))}
-        defaultValues={{ phone: profile.phone ?? "", academicStatusId: profile.academic_status_id ?? undefined }}
+        countries={countries.map((c) => ({
+          value: c.id,
+          label: c.calling_code ? `${c.calling_code} ${c.name}` : c.name,
+        }))}
+        defaultValues={{
+          phoneCountryId: profile.phone_country_id ?? "",
+          phone: profile.phone ?? "",
+          academicStatusId: profile.academic_status_id ?? undefined,
+        }}
       />
-    </div>
+    </StageShell>
   );
 }

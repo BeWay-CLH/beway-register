@@ -48,6 +48,9 @@ const config: Config = {
         "status-warning": "var(--status-warning)",
         "status-danger": "var(--status-danger)",
         "status-info": "var(--status-info)",
+        link: "var(--link)",
+        "link-hover": "var(--link-hover)",
+        "link-on-inverse": "var(--link-on-inverse)",
       },
       backgroundImage: {
         "brand-gradient": "var(--brand-gradient)",
@@ -77,8 +80,6 @@ const config: Config = {
         lg: "var(--radius-lg)",
         xl: "var(--radius-xl)",
         pill: "var(--radius-pill)",
-        brand: "var(--radius-brand)",
-        "brand-card": "16px",
       },
       boxShadow: {
         xs: "var(--shadow-xs)",
@@ -86,8 +87,9 @@ const config: Config = {
         md: "var(--shadow-md)",
         lg: "var(--shadow-lg)",
         glow: "var(--shadow-glow)",
+        "glow-sm": "var(--shadow-glow-sm)",
+        "sticky-top": "var(--shadow-sticky-top)",
         "focus-ring": "var(--ring-focus)",
-        brand: "var(--shadow-brand)",
       },
       transitionDuration: {
         fast: "120ms",

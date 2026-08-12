@@ -8,10 +8,11 @@ import type { z } from "zod";
 import { ArrowRight } from "lucide-react";
 import { presentacionSchema, type PresentacionInput } from "@/lib/validations/cv-vivo/presentacion";
 import { savePresentacion } from "@/app/cv-vivo/presentacion/actions";
-import { Field } from "@/components/ui/Field";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { Button } from "@/components/ui/Button";
+import { FieldGroup } from "@/components/cv-vivo/FieldGroup";
+import { FormField } from "@/components/cv-vivo/FormField";
 
 type PresentacionFormValues = z.input<typeof presentacionSchema>;
 
@@ -46,20 +47,23 @@ export function PresentacionForm({ defaultValues }: PresentacionFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-5">
-      <Field
-        label="Titular"
-        required
-        htmlFor="headline"
-        hint="Una frase corta que te describa profesionalmente."
-        error={errors.headline?.message}
-      >
-        <Input id="headline" invalid={!!errors.headline} {...register("headline")} />
-      </Field>
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-6">
+      <FieldGroup title="Presentación">
+        <FormField
+          label="Titular"
+          required
+          span={12}
+          htmlFor="headline"
+          hint="Una frase corta que te describa profesionalmente."
+          error={errors.headline?.message}
+        >
+          <Input id="headline" invalid={!!errors.headline} {...register("headline")} />
+        </FormField>
 
-      <Field label="Sobre ti" htmlFor="bio" hint="Opcional. Cuéntales a las empresas quién eres." error={errors.bio?.message}>
-        <Textarea id="bio" rows={5} invalid={!!errors.bio} {...register("bio")} />
-      </Field>
+        <FormField label="Sobre ti" span={12} htmlFor="bio" hint="Opcional. Cuéntales a las empresas quién eres." error={errors.bio?.message}>
+          <Textarea id="bio" rows={5} invalid={!!errors.bio} {...register("bio")} />
+        </FormField>
+      </FieldGroup>
 
       {formError && (
         <p role="alert" className="font-body text-small text-status-danger">
@@ -67,8 +71,8 @@ export function PresentacionForm({ defaultValues }: PresentacionFormProps) {
         </p>
       )}
 
-      <Button type="submit" size="lg" fullWidth iconAfter={ArrowRight} disabled={isPending}>
-        {isPending ? "Guardando…" : "Guardar y continuar"}
+      <Button type="submit" size="lg" fullWidth iconAfter={ArrowRight} loading={isPending}>
+        Guardar y continuar
       </Button>
     </form>
   );

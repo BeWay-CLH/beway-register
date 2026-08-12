@@ -1,4 +1,7 @@
 import { CheckCircle } from "lucide-react";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
 import { getCatalog } from "@/lib/catalogs";
 import { RegistroForm } from "@/components/forms/RegistroForm";
 import { Logo } from "@/components/ui/Logo";
@@ -15,18 +18,30 @@ type RegistroPageProps = {
 };
 
 export default async function RegistroPage({ searchParams }: RegistroPageProps) {
-  const [{ error }, countries, universities, studyFields, referralSources] = await Promise.all([
+  const supabase = await createClient();
+  const [
+    {
+      data: { user },
+    },
+    { error },
+    countries,
+    studyFields,
+    referralSources,
+  ] = await Promise.all([
+    supabase.auth.getUser(),
     searchParams,
     getCatalog("countries"),
-    getCatalog("universities"),
     getCatalog("study_fields"),
     getCatalog("referral_sources"),
   ]);
 
+  // Ya con sesión: no tiene sentido volver a mostrar el formulario de alta.
+  if (user) redirect("/cv-vivo");
+
   return (
     <main className="flex flex-1 flex-col md:flex-row">
       <div className="flex flex-col gap-6 bg-brand-gradient px-6 py-12 text-text-on-inverse md:w-1/2 md:justify-center md:px-16 md:py-24">
-        <Logo height={72} className="mx-auto md:mx-0" />
+        <Logo height={72} className="mx-auto md:mx-0" priority />
         <div className="flex flex-col gap-4 text-center md:text-left">
           <SectionLabel onInverse align="center" className="mx-auto md:mx-0 md:items-start">
             Únete
@@ -58,10 +73,15 @@ export default async function RegistroPage({ searchParams }: RegistroPageProps) 
         )}
         <RegistroForm
           countries={countries.map((c) => ({ value: c.id, label: c.name }))}
-          universities={universities.map((u) => ({ value: u.id, label: u.name }))}
           studyFields={studyFields.map((s) => ({ value: s.id, label: s.name }))}
           referralSources={referralSources.map((r) => ({ value: r.id, label: r.name }))}
         />
+        <p className="font-body text-small text-text-muted">
+          ¿Ya tienes cuenta?{" "}
+          <Link href="/iniciar-sesion" className="font-semibold text-link hover:text-link-hover hover:underline">
+            Inicia sesión
+          </Link>
+        </p>
       </div>
     </main>
   );

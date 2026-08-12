@@ -7,30 +7,10 @@ export type Json =
   | Json[]
 
 export type Database = {
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
@@ -159,18 +139,21 @@ export type Database = {
       }
       countries: {
         Row: {
+          calling_code: string | null
           id: string
           is_active: boolean
           name: string
           sort_order: number
         }
         Insert: {
+          calling_code?: string | null
           id: string
           is_active?: boolean
           name: string
           sort_order?: number
         }
         Update: {
+          calling_code?: string | null
           id?: string
           is_active?: boolean
           name?: string
@@ -666,6 +649,7 @@ export type Database = {
           id: string
           marketing_consent: boolean
           phone: string | null
+          phone_country_id: string | null
           profile_photo_url: string | null
           referral_source_id: number | null
           study_field_id: number | null
@@ -685,6 +669,7 @@ export type Database = {
           id: string
           marketing_consent?: boolean
           phone?: string | null
+          phone_country_id?: string | null
           profile_photo_url?: string | null
           referral_source_id?: number | null
           study_field_id?: number | null
@@ -704,6 +689,7 @@ export type Database = {
           id?: string
           marketing_consent?: boolean
           phone?: string | null
+          phone_country_id?: string | null
           profile_photo_url?: string | null
           referral_source_id?: number | null
           study_field_id?: number | null
@@ -723,6 +709,13 @@ export type Database = {
           {
             foreignKeyName: "profiles_country_id_fkey"
             columns: ["country_id"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_phone_country_id_fkey"
+            columns: ["phone_country_id"]
             isOneToOne: false
             referencedRelation: "countries"
             referencedColumns: ["id"]
@@ -987,7 +980,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_wizard_progress: {
+        Args: { p_profile_id: string }
+        Returns: {
+          has_certifications: boolean
+          has_education: boolean
+          has_evidences: boolean
+          has_experience: boolean
+          has_languages: boolean
+          has_preferences: boolean
+          has_privacy_settings: boolean
+          has_projects: boolean
+          has_skills: boolean
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
@@ -1116,11 +1122,7 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {},
   },
 } as const
-

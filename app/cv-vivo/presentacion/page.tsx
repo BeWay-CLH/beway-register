@@ -1,27 +1,25 @@
 import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/cv-vivo/get-current-profile";
 import { PresentacionForm } from "@/components/forms/PresentacionForm";
-import { SectionLabel } from "@/components/ui/SectionLabel";
+import { StageShell } from "@/components/cv-vivo/StageShell";
 
 export default async function PresentacionPage() {
   const profile = await getCurrentProfile();
-  if (!profile) redirect("/registro");
+  if (!profile) redirect("/iniciar-sesion");
 
   return (
-    <div className="flex w-full max-w-md flex-col gap-6">
-      <SectionLabel>Etapa 3 de 10</SectionLabel>
-      <div>
-        <h1 className="font-heading text-h1 text-brand-dark">Presentación</h1>
-        <p className="mt-2 font-body text-body text-text-muted">
-          Es lo primero que ven las empresas de tu perfil — hazlo breve y directo.
-        </p>
-      </div>
+    <StageShell
+      slug="presentacion"
+      title="Presentación"
+      description="Es lo primero que ven las empresas de tu perfil — hazlo breve y directo."
+      whyText="Tu titular y biografía son el primer contacto con las empresas. Una presentación clara aumenta tu visibilidad para oportunidades relevantes."
+    >
       <PresentacionForm
         defaultValues={{
           headline: profile.headline ?? "",
           bio: profile.bio ?? "",
         }}
       />
-    </div>
+    </StageShell>
   );
 }

@@ -1,11 +1,12 @@
-import { forwardRef, type ButtonHTMLAttributes } from "react";
+import type { AnchorHTMLAttributes, ButtonHTMLAttributes } from "react";
+import Link from "next/link";
 import { clsx } from "clsx";
 import { Loader2, type LucideIcon } from "lucide-react";
 
 type ButtonVariant = "primary" | "secondary" | "outline" | "ghost" | "gradient";
 type ButtonSize = "sm" | "md" | "lg";
 
-type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+type ButtonOwnProps = {
   variant?: ButtonVariant;
   size?: ButtonSize;
   /** Lucide icon rendered before the label. */
@@ -21,6 +22,16 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
    * visible de inmediato hace que la espera se sienta más corta. */
   loading?: boolean;
 };
+
+type ButtonAsButtonProps = ButtonOwnProps &
+  ButtonHTMLAttributes<HTMLButtonElement> & { href?: undefined };
+
+/** Pasar `href` renderiza un `next/link` con el mismo estilo — para CTAs
+ * de navegación pura (landing, marketing) que no disparan una acción. */
+type ButtonAsLinkProps = ButtonOwnProps &
+  Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href"> & { href: string };
+
+type ButtonProps = ButtonAsButtonProps | ButtonAsLinkProps;
 
 const sizeClasses: Record<ButtonSize, string> = {
   sm: "h-control-sm px-3 text-small gap-2",
@@ -45,48 +56,61 @@ const onInverseOverrides: Partial<Record<ButtonVariant, string>> = {
   ghost: "text-text-on-inverse hover:bg-white/10",
 };
 
-export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  (
-    {
-      variant = "primary",
-      size = "md",
-      icon: Icon,
-      iconAfter: IconAfter,
-      fullWidth = false,
-      onInverse = false,
-      loading = false,
-      disabled,
-      className,
-      children,
-      ...props
-    },
-    ref,
-  ) => {
-    const iconSize = iconSizes[size];
-    return (
-      <button
-        ref={ref}
-        type="button"
-        disabled={disabled || loading}
-        aria-busy={loading || undefined}
-        className={clsx(
-          "items-center justify-center rounded-md font-body font-semibold tracking-tight",
-          "transition-all duration-fast ease-standard focus-visible:outline-none focus-visible:shadow-focus-ring",
-          "active:translate-y-px disabled:cursor-not-allowed disabled:opacity-45",
-          fullWidth ? "flex w-full" : "inline-flex",
-          sizeClasses[size],
-          variantClasses[variant],
-          onInverse && onInverseOverrides[variant],
-          className,
-        )}
-        {...props}
-      >
-        {loading ? <Loader2 size={iconSize} className="animate-spin" /> : Icon && <Icon size={iconSize} />}
-        {children}
-        {!loading && IconAfter && <IconAfter size={iconSize} />}
-      </button>
-    );
-  },
-);
+export function Button({
+  variant = "primary",
+  size = "md",
+  icon: Icon,
+  iconAfter: IconAfter,
+  fullWidth = false,
+  onInverse = false,
+  loading = false,
+  className,
+  children,
+  ...props
+}: ButtonProps) {
+  const iconSize = iconSizes[size];
+  const classes = clsx(
+    "items-center justify-center rounded-md font-body font-semibold tracking-tight",
+    "transition-all duration-fast ease-standard focus-visible:outline-none focus-visible:shadow-focus-ring",
+    "active:translate-y-px disabled:cursor-not-allowed disabled:opacity-45",
+    fullWidth ? "flex w-full" : "inline-flex",
+    sizeClasses[size],
+    variantClasses[variant],
+    onInverse && onInverseOverrides[variant],
+    className,
+  );
+  const content = (
+    <>
+      {loading ? <Loader2 size={iconSize} className="animate-spin" /> : Icon && <Icon size={iconSize} />}
+      {children}
+      {!loading && IconAfter && <IconAfter size={iconSize} />}
+    </>
+  );
 
-Button.displayName = "Button";
+  // Discriminar con `typeof` en vez de `"href" in props`: TS no conserva
+  // bien la unión discriminada de ButtonProps tras el rest-spread de arriba
+  // cuando la única diferencia entre ramas es la opcionalidad de `href`
+  // (string vs. undefined), así que se afirma el tipo de cada rama después
+  // de comprobarlo en runtime.
+  if (typeof (props as { href?: string }).href === "string") {
+    const { href, ...anchorProps } = props as ButtonAsLinkProps;
+    return (
+      <Link href={href} className={classes} {...anchorProps}>
+        {content}
+      </Link>
+    );
+  }
+
+  const { disabled, ...buttonProps } = props as ButtonAsButtonProps;
+  return (
+    <button
+      type="button"
+      disabled={disabled || loading}
+      aria-busy={loading || undefined}
+      className={classes}
+      {...buttonProps}
+    >
+      {content}
+    </button>
+  );
+}

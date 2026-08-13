@@ -1,8 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { LoginForm } from "@/components/forms/LoginForm";
-import { Logo } from "@/components/ui/Logo";
-import { SectionLabel } from "@/components/ui/SectionLabel";
+import { BrandPanel } from "@/components/forms/BrandPanel";
 
 export default async function IniciarSesionPage() {
   const supabase = await createClient();
@@ -14,18 +13,10 @@ export default async function IniciarSesionPage() {
   if (user) redirect("/cv-vivo");
 
   return (
-    <main className="flex flex-1 flex-col md:flex-row">
-      <div className="flex flex-col gap-6 bg-brand-gradient px-6 py-12 text-text-on-inverse md:w-1/2 md:justify-center md:px-16 md:py-24">
-        <Logo height={72} className="mx-auto md:mx-0" priority />
-        <div className="flex flex-col gap-4 text-center md:text-left">
-          <SectionLabel onInverse align="center" className="mx-auto md:mx-0 md:items-start">
-            Bienvenido de vuelta
-          </SectionLabel>
-          <h1 className="font-heading text-h1 text-white">Tu progreso te está esperando</h1>
-        </div>
-      </div>
+    <main className="flex flex-1 flex-col md:grid md:grid-cols-[46fr_54fr]">
+      <BrandPanel eyebrow="Bienvenido de vuelta" title="Tu progreso te está esperando" />
 
-      <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 py-12 md:px-16 md:py-24">
+      <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 py-12 md:px-12 md:py-16">
         <LoginForm />
       </div>
     </main>

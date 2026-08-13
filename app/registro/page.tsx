@@ -1,11 +1,10 @@
-import { CheckCircle } from "lucide-react";
-import Link from "next/link";
 import { redirect } from "next/navigation";
+import { CheckCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getCatalog } from "@/lib/catalogs";
 import { RegistroForm } from "@/components/forms/RegistroForm";
-import { Logo } from "@/components/ui/Logo";
-import { SectionLabel } from "@/components/ui/SectionLabel";
+import { BrandPanel } from "@/components/forms/BrandPanel";
+import { MiniSteps } from "@/components/forms/MiniSteps";
 
 const BENEFITS = [
   "Acceso anticipado cuando lancemos la plataforma",
@@ -39,49 +38,44 @@ export default async function RegistroPage({ searchParams }: RegistroPageProps) 
   if (user) redirect("/cv-vivo");
 
   return (
-    <main className="flex flex-1 flex-col md:flex-row">
-      <div className="flex flex-col gap-6 bg-brand-gradient px-6 py-12 text-text-on-inverse md:w-1/2 md:justify-center md:px-16 md:py-24">
-        <Logo height={72} className="mx-auto md:mx-0" priority />
-        <div className="flex flex-col gap-4 text-center md:text-left">
-          <SectionLabel onInverse align="center" className="mx-auto md:mx-0 md:items-start">
-            Únete
-          </SectionLabel>
-          <h1 className="font-heading text-h1 text-white">
-            Tu perfil, visible para todo el ecosistema BeWay
-          </h1>
-        </div>
-        <ul className="flex flex-col gap-4">
+    <main className="flex flex-1 flex-col md:grid md:grid-cols-[46fr_54fr]">
+      <BrandPanel eyebrow="Únete" title="Tu perfil, visible para todo el ecosistema BeWay">
+        <ul className="flex flex-col gap-3">
           {BENEFITS.map((benefit) => (
-            <li key={benefit} className="flex items-center gap-3">
-              <span className="text-brand-cyan">
+            <li key={benefit} className="flex items-start justify-center gap-3 md:justify-start">
+              <span className="mt-0.5 shrink-0 text-brand-cyan">
                 <CheckCircle size={20} />
               </span>
-              <span className="font-body text-body text-white/85">{benefit}</span>
+              <span className="text-left font-body text-body text-white/90">{benefit}</span>
             </li>
           ))}
         </ul>
-      </div>
+      </BrandPanel>
 
-      <div className="flex flex-1 flex-col items-center gap-4 px-6 py-12 md:px-16 md:py-24">
-        {error === "confirmation_failed" && (
-          <p
-            role="alert"
-            className="w-full max-w-md rounded-md border border-status-danger/40 bg-status-danger/10 px-4 py-3 text-center font-body text-small text-status-danger"
-          >
-            Tu enlace de confirmación expiró o ya se usó. Vuelve a crear tu cuenta para recibir uno nuevo.
+      <div className="flex flex-1 flex-col items-center gap-4 px-6 py-12 md:px-12 md:py-16">
+        <div className="flex w-full max-w-[560px] flex-col gap-4">
+          <MiniSteps current={0} />
+
+          {error === "confirmation_failed" && (
+            <p
+              role="alert"
+              className="w-full rounded-md border border-status-danger/40 bg-status-danger/10 px-4 py-3 text-center font-body text-small text-status-danger"
+            >
+              Tu enlace de confirmación expiró o ya se usó. Vuelve a crear tu cuenta para recibir uno nuevo.
+            </p>
+          )}
+
+          <RegistroForm
+            countries={countries.map((c) => ({ value: c.id, label: c.name }))}
+            studyFields={studyFields.map((s) => ({ value: s.id, label: s.name }))}
+            referralSources={referralSources.map((r) => ({ value: r.id, label: r.name }))}
+          />
+
+          <p className="text-center font-body text-[12px] text-text-muted">
+            Al continuar entras en el Pre-Registro: podrás completar tu CV Vivo por etapas y guardarlo cuando
+            quieras.
           </p>
-        )}
-        <RegistroForm
-          countries={countries.map((c) => ({ value: c.id, label: c.name }))}
-          studyFields={studyFields.map((s) => ({ value: s.id, label: s.name }))}
-          referralSources={referralSources.map((r) => ({ value: r.id, label: r.name }))}
-        />
-        <p className="font-body text-small text-text-muted">
-          ¿Ya tienes cuenta?{" "}
-          <Link href="/iniciar-sesion" className="font-semibold text-link hover:text-link-hover hover:underline">
-            Inicia sesión
-          </Link>
-        </p>
+        </div>
       </div>
     </main>
   );

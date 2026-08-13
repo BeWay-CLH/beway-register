@@ -14,10 +14,12 @@ export const registroSchema = z
       .min(2, "Ingresa tu nombre completo.")
       .max(200, "El nombre es demasiado largo."),
     email: z.string().trim().toLowerCase().email("Ingresa un correo válido."),
+    // Sin "confirmar contraseña": el campo tiene su propio botón de
+    // mostrar/ocultar (components/forms/PasswordField), que cumple el mismo
+    // propósito (revisar lo que escribiste) sin un segundo campo.
     password: z
       .string()
       .min(8, "La contraseña debe tener al menos 8 caracteres."),
-    confirmPassword: z.string(),
     countryId: z.string().length(2, "Selecciona tu país."),
     universityId: z.coerce
       .number()
@@ -30,10 +32,6 @@ export const registroSchema = z
       .positive("Cuéntanos cómo te enteraste de BeWay."),
     turnstileToken: z.string().min(1, "Verificación anti-bot pendiente."),
   })
-  .extend(consentsSchema.shape)
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Las contraseñas no coinciden.",
-    path: ["confirmPassword"],
-  });
+  .extend(consentsSchema.shape);
 
 export type RegistroInput = z.infer<typeof registroSchema>;

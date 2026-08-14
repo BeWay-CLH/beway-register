@@ -7,6 +7,7 @@ import {
   type SkillInput,
   type LanguageEntryInput,
 } from "@/lib/validations/cv-vivo/habilidades";
+import { maybeSendCvCompleteEmail } from "@/lib/cv-vivo/maybe-complete-cv";
 
 // Server Actions de la etapa 7. Ninguna de las dos tablas tiene límite de
 // cantidad; ambas sí tienen una constraint unique (skills: nombre por
@@ -30,6 +31,7 @@ export async function addSkill(input: SkillInput): Promise<SaveStageResult> {
     }
     return { status: "error", message: "No se pudo guardar. Intenta de nuevo." };
   }
+  await maybeSendCvCompleteEmail(supabase, userId);
   return { status: "success" };
 }
 
@@ -68,6 +70,7 @@ export async function addLanguage(input: LanguageEntryInput): Promise<SaveStageR
     }
     return { status: "error", message: "No se pudo guardar. Intenta de nuevo." };
   }
+  await maybeSendCvCompleteEmail(supabase, userId);
   return { status: "success" };
 }
 

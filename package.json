@@ -6,10 +6,14 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "email:dev": "email dev --dir emails",
+    "email:export": "email export --dir emails",
+    "email:build-auth": "node scripts/build-auth-email-templates.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
+    "@react-email/components": "^1.0.12",
     "@supabase/ssr": "^0.12.3",
     "@supabase/supabase-js": "^2.110.7",
     "@upstash/ratelimit": "^2.0.8",
@@ -31,6 +35,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
     "postcss": "^8.5.19",
+    "react-email": "^6.9.2",
     "supabase": "^2.109.1",
     "tailwindcss": "^3.4.19",
     "typescript": "^5"

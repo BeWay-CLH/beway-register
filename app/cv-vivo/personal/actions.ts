@@ -2,6 +2,7 @@
 
 import { requireUser, type SaveStageResult } from "@/lib/cv-vivo/require-user";
 import { personalSchema, type PersonalInput } from "@/lib/validations/cv-vivo/personal";
+import { maybeSendCvCompleteEmail } from "@/lib/cv-vivo/maybe-complete-cv";
 
 // Server Action de la etapa 2. RLS ya garantiza que solo se actualiza la
 // fila propia (profiles_update_own).
@@ -34,5 +35,6 @@ export async function savePersonal(input: PersonalInput): Promise<SaveStageResul
     return { status: "error", message: "No se pudo guardar. Intenta de nuevo." };
   }
 
+  await maybeSendCvCompleteEmail(supabase, userId);
   return { status: "success" };
 }

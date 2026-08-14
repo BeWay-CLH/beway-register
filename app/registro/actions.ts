@@ -4,7 +4,6 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { verifyTurnstileToken } from "@/lib/turnstile";
 import { getRequestIp, ipRateLimit } from "@/lib/rate-limit";
-import { sendPreRegistrationEmail } from "@/lib/resend";
 import { registroSchema, type RegistroInput } from "@/lib/validations/registro";
 
 export type RegisterAccountResult =
@@ -111,10 +110,10 @@ export async function registerAccount(
     };
   }
 
-  // Correo propio de BeWay (distinto del enlace de confirmación de Supabase
-  // Auth) — nunca bloquea el registro si Resend falla.
-  await sendPreRegistrationEmail(data.email, data.fullName);
-
+  // El correo de bienvenida (#2, docs/email-strategy.md) se envía al
+  // verificar el correo (app/auth/confirm/route.ts), no acá: si se enviara
+  // ya en el registro, llegaría antes de que Supabase confirme la cuenta y
+  // se solaparía con su propio correo de verificación (#1).
   if (!signUpData.session) {
     return { status: "confirm_email", email: data.email };
   }

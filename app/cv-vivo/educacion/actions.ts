@@ -2,6 +2,7 @@
 
 import { requireUser, type SaveStageResult } from "@/lib/cv-vivo/require-user";
 import { educationEntrySchema, type EducationEntryInput } from "@/lib/validations/cv-vivo/educacion";
+import { maybeSendCvCompleteEmail } from "@/lib/cv-vivo/maybe-complete-cv";
 
 // Server Actions de la etapa 4. RLS (education_*_own) ya garantiza que
 // cada usuario solo lee/escribe sus propias filas, pero además filtramos
@@ -37,6 +38,7 @@ export async function saveEducationEntry(input: EducationEntryInput): Promise<Sa
     if (error) {
       return { status: "error", message: "No se pudo guardar. Intenta de nuevo." };
     }
+    await maybeSendCvCompleteEmail(supabase, userId);
     return { status: "success" };
   }
 
@@ -63,6 +65,7 @@ export async function saveEducationEntry(input: EducationEntryInput): Promise<Sa
   if (error) {
     return { status: "error", message: "No se pudo guardar. Intenta de nuevo." };
   }
+  await maybeSendCvCompleteEmail(supabase, userId);
   return { status: "success" };
 }
 

@@ -3,6 +3,7 @@
 import { requireUser, type SaveStageResult } from "@/lib/cv-vivo/require-user";
 import { MAX_REPEATABLE_ENTRIES } from "@/lib/cv-vivo/limits";
 import { projectEntrySchema, type ProjectEntryInput } from "@/lib/validations/cv-vivo/proyectos";
+import { maybeSendCvCompleteEmail } from "@/lib/cv-vivo/maybe-complete-cv";
 
 export async function saveProjectEntry(input: ProjectEntryInput): Promise<SaveStageResult> {
   const auth = await requireUser();
@@ -33,6 +34,7 @@ export async function saveProjectEntry(input: ProjectEntryInput): Promise<SaveSt
     if (error) {
       return { status: "error", message: "No se pudo guardar. Intenta de nuevo." };
     }
+    await maybeSendCvCompleteEmail(supabase, userId);
     return { status: "success" };
   }
 
@@ -52,6 +54,7 @@ export async function saveProjectEntry(input: ProjectEntryInput): Promise<SaveSt
     }
     return { status: "error", message: "No se pudo guardar. Intenta de nuevo." };
   }
+  await maybeSendCvCompleteEmail(supabase, userId);
   return { status: "success" };
 }
 

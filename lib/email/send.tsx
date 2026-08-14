@@ -1,4 +1,4 @@
-import { resend, FROM_ADDRESS } from "@/lib/resend";
+import { getResendClient, FROM_ADDRESS } from "@/lib/resend";
 import { WelcomeEmail } from "@/emails/WelcomeEmail";
 import { NoStartReminderEmail } from "@/emails/NoStartReminderEmail";
 import { HalfwayReminderEmail } from "@/emails/HalfwayReminderEmail";
@@ -14,7 +14,7 @@ function firstNameOf(fullName: string) {
 
 async function send(to: string, subject: string, react: React.ReactElement, logLabel: string) {
   try {
-    const { error } = await resend.emails.send({ from: FROM_ADDRESS, to, subject, react });
+    const { error } = await getResendClient().emails.send({ from: FROM_ADDRESS, to, subject, react });
     if (error) {
       console.error(`[email] no se pudo enviar ${logLabel}:`, error);
     }

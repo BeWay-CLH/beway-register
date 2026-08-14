@@ -13,6 +13,16 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
+  {
+    // Plantillas de correo (docs/email-strategy.md): renderizan a HTML
+    // estático fuera del pipeline de Next.js, así que <img> literal es
+    // obligatorio — next/image no produce una URL pública estable que un
+    // cliente de correo pueda cargar.
+    files: ["emails/**/*.tsx"],
+    rules: {
+      "@next/next/no-img-element": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;

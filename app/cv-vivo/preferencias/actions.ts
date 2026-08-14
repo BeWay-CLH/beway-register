@@ -2,6 +2,7 @@
 
 import { requireUser, type SaveStageResult } from "@/lib/cv-vivo/require-user";
 import { preferencesSchema, type PreferencesInput } from "@/lib/validations/cv-vivo/preferencias";
+import { maybeSendCvCompleteEmail } from "@/lib/cv-vivo/maybe-complete-cv";
 
 // Server Action de la etapa 9. `preferences` va primero: las tres tablas
 // puente referencian preferences.profile_id (no profiles.id), así que sin
@@ -66,5 +67,6 @@ export async function savePreferences(input: PreferencesInput): Promise<SaveStag
     return { status: "error", message: "No se pudo guardar. Intenta de nuevo." };
   }
 
+  await maybeSendCvCompleteEmail(supabase, userId);
   return { status: "success" };
 }

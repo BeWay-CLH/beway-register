@@ -1,10 +1,4 @@
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
 export type Database = {
   // Allows to automatically instantiate createClient with right options
@@ -231,6 +225,38 @@ export type Database = {
             columns: ["university_id"]
             isOneToOne: false
             referencedRelation: "universities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_log: {
+        Row: {
+          dedupe_key: string
+          email_type: string
+          id: number
+          profile_id: string
+          sent_at: string
+        }
+        Insert: {
+          dedupe_key?: string
+          email_type: string
+          id?: never
+          profile_id: string
+          sent_at?: string
+        }
+        Update: {
+          dedupe_key?: string
+          email_type?: string
+          id?: never
+          profile_id?: string
+          sent_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_log_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -643,6 +669,7 @@ export type Database = {
           bio: string | null
           country_id: string | null
           created_at: string
+          cv_completed_at: string | null
           email: string
           full_name: string
           headline: string | null
@@ -655,6 +682,7 @@ export type Database = {
           study_field_id: number | null
           terms_accepted_at: string
           university_id: number | null
+          unsubscribe_token: string
           updated_at: string
           video_pitch_url: string | null
         }
@@ -663,6 +691,7 @@ export type Database = {
           bio?: string | null
           country_id?: string | null
           created_at?: string
+          cv_completed_at?: string | null
           email: string
           full_name: string
           headline?: string | null
@@ -675,6 +704,7 @@ export type Database = {
           study_field_id?: number | null
           terms_accepted_at: string
           university_id?: number | null
+          unsubscribe_token?: string
           updated_at?: string
           video_pitch_url?: string | null
         }
@@ -683,6 +713,7 @@ export type Database = {
           bio?: string | null
           country_id?: string | null
           created_at?: string
+          cv_completed_at?: string | null
           email?: string
           full_name?: string
           headline?: string | null
@@ -695,6 +726,7 @@ export type Database = {
           study_field_id?: number | null
           terms_accepted_at?: string
           university_id?: number | null
+          unsubscribe_token?: string
           updated_at?: string
           video_pitch_url?: string | null
         }
@@ -980,6 +1012,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_profile_last_activity: {
+        Args: { p_profile_id: string }
+        Returns: string
+      }
       get_wizard_progress: {
         Args: { p_profile_id: string }
         Returns: {

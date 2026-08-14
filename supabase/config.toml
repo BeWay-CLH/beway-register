@@ -223,7 +223,7 @@ enable_signup = true
 # addresses. If disabled, only the new email is required to confirm.
 double_confirm_changes = true
 # If enabled, users need to confirm their email address before signing in.
-enable_confirmations = false
+enable_confirmations = true
 # If enabled, users will need to reauthenticate or have logged in recently to change their password.
 secure_password_change = false
 # Controls the minimum amount of time that must pass before sending another signup confirmation or password reset email.
@@ -233,20 +233,39 @@ otp_length = 6
 # Number of seconds before the email OTP expires (defaults to 1 hour).
 otp_expiry = 3600
 
-# Use a production-ready SMTP server
-# [auth.email.smtp]
-# enabled = true
-# host = "smtp.sendgrid.net"
-# port = 587
-# user = "apikey"
-# pass = "env(SENDGRID_API_KEY)"
-# admin_email = "admin@email.com"
-# sender_name = "Admin"
+# SMTP vía Resend (docs/email-strategy.md > correos #1 y #9): sin esto,
+# Supabase envía la confirmación/recuperación con su propio remitente
+# genérico, sin la marca de BeWay. host/port/user son los valores
+# documentados por Resend para su relay SMTP — confirmar contra el
+# dashboard de Resend (Settings > SMTP) antes de dar esto por definitivo
+# en producción, por si cambiaron. RESEND_API_KEY es la misma clave que
+# usa lib/resend.ts para el resto de los correos (vía Resend API, no SMTP).
+# admin_email DEBE ser una dirección de un dominio verificado en Resend
+# (bbeway.com) — team@clhglobal.org causaba un 550 "domain is not
+# verified" en cada intento de registro (ver logs de auth_logs), que
+# tumbaba todo signUp() porque Supabase no podía enviar el correo de
+# confirmación.
+[auth.email.smtp]
+enabled = true
+host = "smtp.resend.com"
+port = 465
+user = "resend"
+pass = "env(RESEND_API_KEY)"
+admin_email = "comunicaciones@bbeway.com"
+sender_name = "BeWay"
 
-# Uncomment to customize email template
-# [auth.email.template.invite]
-# subject = "You have been invited"
-# content_path = "./supabase/templates/invite.html"
+# Correo #1 — Verificación de cuenta (ranura "Confirm signup" en el
+# dashboard de Supabase). Fuente: emails/VerificationEmail.tsx, compilada
+# con `npm run email:build-auth` — nunca editar este .html a mano.
+[auth.email.template.confirmation]
+subject = "Confirma tu correo para activar tu cuenta en BeWay"
+content_path = "./supabase/templates/confirmation.html"
+
+# Correo #9 — Recuperación de contraseña (ranura "Reset Password").
+# Fuente: emails/PasswordRecoveryEmail.tsx, misma compilación que arriba.
+[auth.email.template.recovery]
+subject = "Restablece tu contraseña de BeWay"
+content_path = "./supabase/templates/recovery.html"
 
 # Uncomment to customize notification email template
 # [auth.email.notification.password_changed]

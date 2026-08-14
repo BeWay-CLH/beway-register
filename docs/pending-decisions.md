@@ -12,6 +12,8 @@ Documento vivo. El agente `planner` lo revisa antes de cada nueva planificación
 | 6 | Herramienta de analítica definitiva: Vercel Analytics vs. Plausible | Plausible es cookieless y evita el banner de consentimiento de cookies (LSSI-CE); Vercel Analytics podría requerirlo | Producto | Pendiente |
 | 7 | Incentivo de completitud: diseño visual final de la insignia y su presentación en el perfil | Ya confirmado el concepto (insignia al 100% de completitud); falta el diseño visual | Producto + Diseño | Pendiente |
 | 8 | DPIA (Evaluación de Impacto) para KYC académico y Beway Score | Se activará cuando se planifique esa fase futura — no es parte del alcance del pre-registro actual | Legal (cuando se planifique esa fase) | No urgente — anotado para más adelante |
+| 9 | Dirección postal real de BeWay para el footer de los correos | CAN-SPAM/GDPR exigen una dirección física identificable en correos comerciales; el footer de `emails/components/Footer.tsx` usa un placeholder `[Dirección legal pendiente]` | Negocio | Pendiente |
+| 10 | Umbrales de días para los correos #3/#4/#5 y cadencia de #7 | Ver docs/email-strategy.md > Decisiones abiertas — implementados como constantes nombradas en `lib/email/config.ts`, fáciles de ajustar sin tocar la lógica de envío | Negocio | Pendiente |
 
 ## Resueltas (historial)
 

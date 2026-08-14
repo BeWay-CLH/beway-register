@@ -1,9 +1,11 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireUser, type SaveStageResult } from "@/lib/cv-vivo/require-user";
+import { sendDataRequestConfirmationEmail } from "@/lib/email/send";
 
 // Cierra sesión y vuelve al landing — sin datos sensibles de por medio, no
 // necesita el guard de requireUser() (rate limit + validación de sesión).
@@ -57,10 +59,15 @@ export async function exportMyData() {
     return { status: "error" as const, message: "No se pudo exportar tu información. Intenta de nuevo." };
   }
 
+  // Correo #8 — confirmación de exportación (Art. 15 RGPD, docs/email-strategy.md).
+  // `after()`: no debe retrasar la respuesta que dispara la descarga en el cliente.
+  const exportedAt = new Date().toISOString();
+  after(() => sendDataRequestConfirmationEmail(profile.data.email, "export", exportedAt));
+
   return {
     status: "success" as const,
     data: {
-      exportedAt: new Date().toISOString(),
+      exportedAt,
       profile: profile.data,
       education: education.data ?? [],
       experiences: experiences.data ?? [],
@@ -88,6 +95,11 @@ export async function deleteMyAccount(): Promise<SaveStageResult> {
   const auth = await requireUser();
   if (!auth.ok) return { status: "error", message: auth.message };
 
+  // El correo de confirmación (#8) se envía tras borrar la cuenta, así que
+  // el destino hay que leerlo antes: una vez eliminado auth.users, ya no
+  // hay ninguna fila de profiles de la que sacarlo.
+  const { data: profile } = await auth.supabase.from("profiles").select("email").eq("id", auth.userId).single();
+
   const admin = createAdminClient();
   const { error } = await admin.auth.admin.deleteUser(auth.userId);
 
@@ -97,6 +109,15 @@ export async function deleteMyAccount(): Promise<SaveStageResult> {
       status: "error",
       message: "No se pudo eliminar tu cuenta. Escríbenos a team@clhglobal.org si el problema persiste.",
     };
+  }
+
+  // Correo #8 — confirmación de eliminación (Art. 17 RGPD,
+  // docs/email-strategy.md). Si por lo que sea no se pudo leer el correo
+  // arriba, la cuenta igual se elimina — la confirmación es un extra, no
+  // un requisito para completar el borrado.
+  if (profile) {
+    const deletedAt = new Date().toISOString();
+    after(() => sendDataRequestConfirmationEmail(profile.email, "deletion", deletedAt));
   }
 
   // deleteUser() borra el usuario en Auth pero no la sesión de este

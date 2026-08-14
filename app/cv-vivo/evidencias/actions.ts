@@ -2,6 +2,7 @@
 
 import { requireUser, type SaveStageResult } from "@/lib/cv-vivo/require-user";
 import { evidenceEntrySchema, type EvidenceEntryInput } from "@/lib/validations/cv-vivo/evidencias";
+import { maybeSendCvCompleteEmail } from "@/lib/cv-vivo/maybe-complete-cv";
 
 export async function saveEvidenceEntry(input: EvidenceEntryInput): Promise<SaveStageResult> {
   const auth = await requireUser();
@@ -25,6 +26,7 @@ export async function saveEvidenceEntry(input: EvidenceEntryInput): Promise<Save
     if (error) {
       return { status: "error", message: "No se pudo guardar. Intenta de nuevo." };
     }
+    await maybeSendCvCompleteEmail(supabase, userId);
     return { status: "success" };
   }
 
@@ -33,6 +35,7 @@ export async function saveEvidenceEntry(input: EvidenceEntryInput): Promise<Save
   if (error) {
     return { status: "error", message: "No se pudo guardar. Intenta de nuevo." };
   }
+  await maybeSendCvCompleteEmail(supabase, userId);
   return { status: "success" };
 }
 

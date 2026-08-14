@@ -76,6 +76,13 @@ export function LoginForm() {
           </FormField>
         </FieldGroup>
 
+        <Link
+          href="/recuperar-password"
+          className="-mt-2 self-end font-body text-small font-semibold text-link hover:text-link-hover hover:underline"
+        >
+          ¿Olvidaste tu contraseña?
+        </Link>
+
         {formError && (
           <p role="alert" className="font-body text-small text-status-danger">
             {formError}

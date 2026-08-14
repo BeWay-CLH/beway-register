@@ -2,6 +2,7 @@
 
 import { requireUser, type SaveStageResult } from "@/lib/cv-vivo/require-user";
 import { presentacionSchema, type PresentacionInput } from "@/lib/validations/cv-vivo/presentacion";
+import { maybeSendCvCompleteEmail } from "@/lib/cv-vivo/maybe-complete-cv";
 
 export async function savePresentacion(input: PresentacionInput): Promise<SaveStageResult> {
   const auth = await requireUser();
@@ -31,5 +32,6 @@ export async function savePresentacion(input: PresentacionInput): Promise<SaveSt
     return { status: "error", message: "No se pudo guardar. Intenta de nuevo." };
   }
 
+  await maybeSendCvCompleteEmail(supabase, userId);
   return { status: "success" };
 }

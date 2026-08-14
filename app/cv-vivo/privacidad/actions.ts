@@ -2,6 +2,7 @@
 
 import { requireUser, type SaveStageResult } from "@/lib/cv-vivo/require-user";
 import { privacySettingsSchema, type PrivacySettingsInput } from "@/lib/validations/cv-vivo/privacidad";
+import { maybeSendCvCompleteEmail } from "@/lib/cv-vivo/maybe-complete-cv";
 
 // Server Action de la etapa 11, la última del wizard. privacy_settings es
 // 1:1 con profiles (profile_id como PK) — sin tablas puente, un solo upsert.
@@ -25,5 +26,6 @@ export async function savePrivacySettings(input: PrivacySettingsInput): Promise<
   if (error) {
     return { status: "error", message: "No se pudo guardar. Intenta de nuevo." };
   }
+  await maybeSendCvCompleteEmail(supabase, userId);
   return { status: "success" };
 }

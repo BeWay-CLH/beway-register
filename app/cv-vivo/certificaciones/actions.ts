@@ -3,6 +3,7 @@
 import { requireUser, type SaveStageResult } from "@/lib/cv-vivo/require-user";
 import { MAX_REPEATABLE_ENTRIES } from "@/lib/cv-vivo/limits";
 import { certificationEntrySchema, type CertificationEntryInput } from "@/lib/validations/cv-vivo/certificaciones";
+import { maybeSendCvCompleteEmail } from "@/lib/cv-vivo/maybe-complete-cv";
 
 export async function saveCertificationEntry(input: CertificationEntryInput): Promise<SaveStageResult> {
   const auth = await requireUser();
@@ -32,6 +33,7 @@ export async function saveCertificationEntry(input: CertificationEntryInput): Pr
     if (error) {
       return { status: "error", message: "No se pudo guardar. Intenta de nuevo." };
     }
+    await maybeSendCvCompleteEmail(supabase, userId);
     return { status: "success" };
   }
 
@@ -50,6 +52,7 @@ export async function saveCertificationEntry(input: CertificationEntryInput): Pr
     }
     return { status: "error", message: "No se pudo guardar. Intenta de nuevo." };
   }
+  await maybeSendCvCompleteEmail(supabase, userId);
   return { status: "success" };
 }
 

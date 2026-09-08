@@ -16,7 +16,7 @@ export function NoStartReminderEmail({ firstName, unsubscribeUrl }: NoStartRemin
       <Header />
       <TextBlock title="Tu perfil profesional te está esperando">
         <BodyText>
-          Hola {firstName}, creaste tu cuenta en BeWay pero todavía no empezaste tu CV Vivo. Son etapas cortas —
+          Hola {firstName}, creaste tu cuenta en BeWay pero todavía no empezaste tu CV Vivo. Son 10 etapas cortas —
           puedes hacerlo por partes, guardando tu progreso en cada una.
         </BodyText>
         <BodyText muted last>

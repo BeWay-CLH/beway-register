@@ -11,6 +11,7 @@ import {
   HeartHandshake,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { Footer } from "@/components/layout/Footer";
 import { Logo } from "@/components/ui/Logo";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -28,12 +29,12 @@ const CONTACT_EMAIL = "team@clhglobal.org";
 // secuencial 1-6 en vez de los valores 2-11 reales de WIZARD_STAGES.
 const HERO_PROGRESS: WizardProgress = {
   stages: [
-    { slug: "personal", order: 1, label: "Información personal", implemented: true, isComplete: true },
-    { slug: "presentacion", order: 2, label: "Presentación", implemented: true, isComplete: true },
-    { slug: "educacion", order: 3, label: "Educación", implemented: true, isComplete: false },
-    { slug: "experiencia", order: 4, label: "Experiencia", implemented: true, isComplete: false },
-    { slug: "habilidades", order: 5, label: "Habilidades e idiomas", implemented: true, isComplete: false },
-    { slug: "evidencias", order: 6, label: "Evidencias", implemented: true, isComplete: false },
+    { slug: "personal", order: 1, label: "Información personal", implemented: true, isComplete: true, optional: false },
+    { slug: "presentacion", order: 2, label: "Presentación", implemented: true, isComplete: true, optional: false },
+    { slug: "educacion", order: 3, label: "Educación", implemented: true, isComplete: false, optional: false },
+    { slug: "experiencia", order: 4, label: "Experiencia", implemented: true, isComplete: false, optional: true },
+    { slug: "habilidades", order: 5, label: "Habilidades e idiomas", implemented: true, isComplete: false, optional: false },
+    { slug: "evidencias", order: 6, label: "Evidencias", implemented: true, isComplete: false, optional: false },
   ],
   completedCount: 2,
   totalCount: 6,
@@ -159,7 +160,10 @@ const STEPS = [
     title: "Completa tu CV Vivo",
     body: "Diez etapas guardables: educación, experiencia, proyectos, habilidades y evidencias.",
   },
-  { title: "Entra al ecosistema", body: "Cuando lancemos, tu perfil ya estará visible para las empresas del ecosistema." },
+  {
+    title: "Llega listo al lanzamiento",
+    body: "Cuando abramos BeWay, tu CV Vivo estará preparado para empezar a conectar con nuevas oportunidades.",
+  },
 ];
 
 function HowItWorks() {
@@ -200,7 +204,7 @@ const VALUE = [
   {
     icon: FileUser,
     title: "CV Vivo",
-    body: "Un perfil que crece contigo: educación, proyectos, habilidades y evidencias en un solo lugar.",
+    body: "Mucho más que un currículum. Reúne formación, proyectos, habilidades y evidencias en un solo lugar.",
   },
   {
     icon: Rocket,
@@ -254,7 +258,7 @@ function FinalCTA({ hasSession }: { hasSession: boolean }) {
               Empieza tu CV Vivo hoy y llega listo al lanzamiento
             </h2>
             <p className="max-w-[440px] font-body text-body text-text-on-inverse-muted">
-              Guardas tu progreso etapa por etapa. Cuando abramos la plataforma, tu perfil ya estará listo.
+              Guardas tu progreso etapa por etapa. Cuando lancemos BeWay, continuarás desde donde lo dejaste.
             </p>
             <div className="flex flex-wrap justify-center gap-3">
               {hasSession ? (
@@ -274,32 +278,6 @@ function FinalCTA({ hasSession }: { hasSession: boolean }) {
         </Card>
       </div>
     </section>
-  );
-}
-
-function Footer() {
-  const year = new Date().getFullYear();
-  return (
-    <footer className="bg-brand-dark py-10">
-      <div className="mx-auto flex max-w-[1200px] flex-col items-center gap-6 px-6">
-        <Logo height={28} />
-        <div className="flex w-full flex-col items-center gap-3 border-t border-border-inverse pt-6 font-body text-small text-text-on-inverse-muted md:flex-row md:justify-between">
-          <p>© {year} BeWay. Todos los derechos reservados.</p>
-          <div className="flex items-center gap-4">
-            {/* Política de Privacidad y Términos y Condiciones: pendiente de
-                revisión legal (CLAUDE.md > Privacidad y GDPR/LOPDGDD) — sin
-                página propia todavía, así que quedan como texto plano, no
-                enlaces rotos. Contacto sí es real: mismo correo que usan
-                los mensajes de error de la app. */}
-            <span>Privacidad</span>
-            <span>Términos</span>
-            <a href={`mailto:${CONTACT_EMAIL}`} className="hover:text-white hover:underline">
-              Contacto
-            </a>
-          </div>
-        </div>
-      </div>
-    </footer>
   );
 }
 

@@ -27,6 +27,12 @@ export type WizardStage = {
   /** false = ruta ya existe (aparece en el stepper) pero aún es un stub. */
   implemented: boolean;
   isComplete: (ctx: WizardContext) => boolean;
+  /** Etapa que puede quedar en 0 entradas sin penalizar el % de
+   * completitud ni la insignia de 100% — feedback de negocio: no todos
+   * los estudiantes tienen ya una experiencia laboral o un proyecto
+   * propio, y eso no debería bloquear un perfil "completo". Ver
+   * lib/cv-vivo/progress.ts > getWizardProgress. */
+  optional?: boolean;
 };
 
 // Etapas 2-11 del CV Vivo (CLAUDE.md > Modelo de datos). El Paso 1
@@ -63,17 +69,19 @@ export const WIZARD_STAGES: WizardStage[] = [
     slug: "experiencia",
     order: 5,
     label: "Experiencia",
-    description: "Hasta 3 experiencias laborales.",
+    description: "Hasta 3 experiencias laborales. Opcional si todavía no has tenido ninguna.",
     implemented: true,
     isComplete: (ctx) => ctx.hasExperience,
+    optional: true,
   },
   {
     slug: "proyectos",
     order: 6,
     label: "Proyectos y actividades",
-    description: "Hasta 3 proyectos o actividades.",
+    description: "Hasta 3 proyectos o actividades. Opcional si todavía no tienes ninguno.",
     implemented: true,
     isComplete: (ctx) => ctx.hasProjects,
+    optional: true,
   },
   {
     slug: "habilidades",

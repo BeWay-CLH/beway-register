@@ -33,8 +33,9 @@ export default async function ProyectosPage() {
     <StageShell
       slug="proyectos"
       title="Proyectos y actividades"
-      description="Destaca lo que has construido fuera del salón de clases. Hasta 3 proyectos, actividades extracurriculares o hackathons."
+      description="Destaca lo que has construido fuera del salón de clases. Hasta 3 proyectos, actividades extracurriculares o hackathons. Si todavía no tienes ninguno, puedes continuar sin añadir nada."
       whyText="Tus proyectos demuestran iniciativa y habilidades aplicadas más allá del aula. Las empresas valoran la experiencia práctica y la capacidad de llevar ideas a la realidad."
+      badge="Opcional"
     >
       <ProyectosForm entries={entries} projectTypes={projectTypes.map((t) => ({ value: t.id, label: t.name }))} />
     </StageShell>

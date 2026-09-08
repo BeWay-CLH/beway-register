@@ -22,3 +22,5 @@ Documento vivo. El agente `planner` lo revisa antes de cada nueva planificación
 | R1 | Incentivo por completar el CV Vivo | Insignia especial de "completitud 100%", visible para empresas |
 | R2 | Reutilización de campos entre cuenta y CV Vivo | Universidad y carrera capturadas en el Paso 1 se pre-cargan en la Etapa 4; no se piden dos veces |
 | R3 | Límite de entradas en campos repetibles | Máximo 3 por campo (Experiencia, Proyectos y Actividades, Formación Complementaria), modelado como 1:N para poder extenderse después sin migración |
+| R7 | Experiencia y Proyectos: ¿obligatorias u opcionales en el CV Vivo? | Feedback de negocio (sept. 2026): pasan a opcionales — `optional: true` en `lib/cv-vivo/stages.ts`. Vacías, se excluyen del denominador del % y de la insignia de 100%; si el usuario añade algo, cuentan igual que cualquier otra etapa |
+| R8 | ¿"Mi CV" debe mostrar las descripciones largas completas o truncadas? | Feedback de negocio: completas siempre, sin `line-clamp`. Se agregó `description` a Educación y Experiencia en `app/cuenta/page.tsx`/`PerfilPanels.tsx` (antes no se mostraba en absoluto) y se quitó el `line-clamp-3` de Proyectos |

@@ -115,10 +115,16 @@ export function StepNav({ progress, currentSlug, footer }: StepNavProps) {
                 >
                   {stage.label}
                 </span>
-                {state === "done" && (
+                {state === "done" ? (
                   <span className="ml-auto shrink-0 font-body text-[11px] font-semibold uppercase tracking-caps text-brand-cyan-600">
                     Ok
                   </span>
+                ) : (
+                  stage.optional && (
+                    <span className="ml-auto shrink-0 font-body text-[11px] font-semibold uppercase tracking-caps text-text-muted">
+                      Opcional
+                    </span>
+                  )
                 )}
               </Link>
             </li>

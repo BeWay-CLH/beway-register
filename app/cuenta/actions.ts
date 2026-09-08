@@ -6,6 +6,43 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireUser, type SaveStageResult } from "@/lib/cv-vivo/require-user";
 import { sendDataRequestConfirmationEmail } from "@/lib/email/send";
+import { getCvPdfData } from "@/lib/cv-pdf/get-cv-pdf-data";
+import { renderCvPdf } from "@/lib/cv-pdf/render";
+
+export type ExportCvPdfResult =
+  | { status: "success"; pdfBase64: string; fileName: string }
+  | { status: "error"; message: string };
+
+// CV en PDF con la marca de BeWay (feedback de negocio, sept. 2026): un
+// currículum convencional listo para aplicar a ofertas, generado con toda
+// la información del propio CV Vivo. A diferencia de exportMyData (JSON
+// crudo, para portabilidad GDPR), acá el contacto del usuario SIEMPRE va
+// completo — es su propia copia, no una que se comparta con un tercero
+// (ver app/api/admin/generate-cv-pdf/route.ts para ese caso, que sí filtra
+// por privacy_settings).
+export async function exportCvPdf(): Promise<ExportCvPdfResult> {
+  const auth = await requireUser();
+  if (!auth.ok) return { status: "error", message: auth.message };
+
+  const data = await getCvPdfData(auth.supabase, auth.userId);
+  if (!data) {
+    return { status: "error", message: "No se pudo generar tu CV. Intenta de nuevo." };
+  }
+
+  const pdfBuffer = await renderCvPdf(data);
+  const slug = data.fullName
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  return {
+    status: "success",
+    pdfBase64: pdfBuffer.toString("base64"),
+    fileName: `cv-beway-${slug || "perfil"}.pdf`,
+  };
+}
 
 // Cierra sesión y vuelve al landing — sin datos sensibles de por medio, no
 // necesita el guard de requireUser() (rate limit + validación de sesión).

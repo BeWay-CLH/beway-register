@@ -14,6 +14,7 @@ Documento vivo. El agente `planner` lo revisa antes de cada nueva planificación
 | 8 | DPIA (Evaluación de Impacto) para KYC académico y Beway Score | Se activará cuando se planifique esa fase futura — no es parte del alcance del pre-registro actual | Legal (cuando se planifique esa fase) | No urgente — anotado para más adelante |
 | 9 | Dirección postal real de BeWay para el footer de los correos | CAN-SPAM/GDPR exigen una dirección física identificable en correos comerciales; el footer de `emails/components/Footer.tsx` usa un placeholder `[Dirección legal pendiente]` | Negocio | Pendiente |
 | 10 | Umbrales de días para los correos #3/#4/#5 y cadencia de #7 | Ver docs/email-strategy.md > Decisiones abiertas — implementados como constantes nombradas en `lib/email/config.ts`, fáciles de ajustar sin tocar la lógica de envío | Negocio | Pendiente |
+| 11 | `public/brand/logo-stacked-negative.png` y `logo-negative-inline-transparent.png` están truncados (falta el IDAT final y el chunk IEND) | Descubierto al generar el CV en PDF: `@react-pdf/renderer` los rechaza ("Incomplete or corrupt PNG file"); el navegador lo disimula vía `sharp`/next-image, así que hoy no se nota en la UI, pero es frágil. Solo `logo-icon-transparent.png` está íntegro | Diseño (regenerar/re-exportar los PNG) | Pendiente |
 
 ## Resueltas (historial)
 
@@ -22,3 +23,4 @@ Documento vivo. El agente `planner` lo revisa antes de cada nueva planificación
 | R1 | Incentivo por completar el CV Vivo | Insignia especial de "completitud 100%", visible para empresas |
 | R2 | Reutilización de campos entre cuenta y CV Vivo | Universidad y carrera capturadas en el Paso 1 se pre-cargan en la Etapa 4; no se piden dos veces |
 | R3 | Límite de entradas en campos repetibles | Máximo 3 por campo (Experiencia, Proyectos y Actividades, Formación Complementaria), modelado como 1:N para poder extenderse después sin migración |
+| R9 | ¿Cómo se genera el CV en PDF con marca BeWay? | Feedback de negocio: `@react-pdf/renderer`, plantilla en `lib/cv-pdf/`. Fuentes de marca embebidas como `data:` URL (un Buffer crudo falla en runtime pese a lo que sugiere la documentación); logo del header es `logo-icon-transparent.png` — ver nota sobre PNGs truncados abajo |

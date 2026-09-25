@@ -2,13 +2,28 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Download, LogOut, Trash2 } from "lucide-react";
-import { exportMyData, deleteMyAccount, logout } from "@/app/cuenta/actions";
+import { Download, FileText, LogOut, Trash2 } from "lucide-react";
+import { exportMyData, exportCvPdf, deleteMyAccount, logout } from "@/app/cuenta/actions";
 import { Button } from "@/components/ui/Button";
+
+function downloadBlob(blob: Blob, fileName: string) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = fileName;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+function base64ToBlob(base64: string, type: string) {
+  const bytes = Uint8Array.from(atob(base64), (char) => char.charCodeAt(0));
+  return new Blob([bytes], { type });
+}
 
 export function CuentaActions() {
   const router = useRouter();
   const [isExporting, startExport] = useTransition();
+  const [isExportingPdf, startExportPdf] = useTransition();
   const [isDeleting, startDelete] = useTransition();
   const [isLoggingOut, startLogout] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -22,12 +37,19 @@ export function CuentaActions() {
         return;
       }
       const blob = new Blob([JSON.stringify(result.data, null, 2)], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `beway-cv-vivo-${new Date().toISOString().slice(0, 10)}.json`;
-      link.click();
-      URL.revokeObjectURL(url);
+      downloadBlob(blob, `beway-cv-vivo-${new Date().toISOString().slice(0, 10)}.json`);
+    });
+  }
+
+  function handleExportPdf() {
+    setError(null);
+    startExportPdf(async () => {
+      const result = await exportCvPdf();
+      if (result.status === "error") {
+        setError(result.message);
+        return;
+      }
+      downloadBlob(base64ToBlob(result.pdfBase64, "application/pdf"), result.fileName);
     });
   }
 
@@ -53,6 +75,9 @@ export function CuentaActions() {
 
   return (
     <div className="flex w-full max-w-md flex-col gap-3">
+      <Button variant="outline" icon={FileText} onClick={handleExportPdf} loading={isExportingPdf} fullWidth>
+        Descargar mi CV en PDF
+      </Button>
       <Button variant="outline" icon={Download} onClick={handleExport} loading={isExporting} fullWidth>
         Exportar mis datos
       </Button>

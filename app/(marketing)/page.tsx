@@ -29,12 +29,12 @@ const CONTACT_EMAIL = "team@clhglobal.org";
 // secuencial 1-6 en vez de los valores 2-11 reales de WIZARD_STAGES.
 const HERO_PROGRESS: WizardProgress = {
   stages: [
-    { slug: "personal", order: 1, label: "Información personal", implemented: true, isComplete: true, optional: false },
-    { slug: "presentacion", order: 2, label: "Presentación", implemented: true, isComplete: true, optional: false },
-    { slug: "educacion", order: 3, label: "Educación", implemented: true, isComplete: false, optional: false },
-    { slug: "experiencia", order: 4, label: "Experiencia", implemented: true, isComplete: false, optional: true },
-    { slug: "habilidades", order: 5, label: "Habilidades e idiomas", implemented: true, isComplete: false, optional: false },
-    { slug: "evidencias", order: 6, label: "Evidencias", implemented: true, isComplete: false, optional: false },
+    { slug: "personal", order: 1, label: "Información personal", implemented: true, isComplete: true },
+    { slug: "presentacion", order: 2, label: "Presentación", implemented: true, isComplete: true },
+    { slug: "educacion", order: 3, label: "Educación", implemented: true, isComplete: false },
+    { slug: "experiencia", order: 4, label: "Experiencia", implemented: true, isComplete: false },
+    { slug: "habilidades", order: 5, label: "Habilidades e idiomas", implemented: true, isComplete: false },
+    { slug: "evidencias", order: 6, label: "Evidencias", implemented: true, isComplete: false },
   ],
   completedCount: 2,
   totalCount: 6,

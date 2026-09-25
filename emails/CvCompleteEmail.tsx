@@ -32,7 +32,7 @@ export function CvCompleteEmail({ firstName }: CvCompleteEmailProps) {
           { title: "Te avisamos en el lanzamiento.", body: "Sin correos de más mientras tanto." },
         ]}
       />
-      <EmailButton href={`${SITE_URL}/cuenta`} label="Ver mi perfil" variant="secondary" />
+      <EmailButton href={`${SITE_URL}/cv-vivo`} label="Ver mi CV Vivo" variant="secondary" />
       <Signature />
       <Banderola />
       <Footer category="transactional" />

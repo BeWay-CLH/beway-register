@@ -1,10 +1,36 @@
-export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "14.5"
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
   }
   public: {
     Tables: {
@@ -677,10 +703,13 @@ export type Database = {
           marketing_consent: boolean
           phone: string | null
           phone_country_id: string | null
+          privacy_notice_presented_at: string
+          privacy_notice_version: string
           profile_photo_url: string | null
           referral_source_id: number | null
           study_field_id: number | null
           terms_accepted_at: string
+          terms_version: string
           university_id: number | null
           unsubscribe_token: string
           updated_at: string
@@ -699,10 +728,13 @@ export type Database = {
           marketing_consent?: boolean
           phone?: string | null
           phone_country_id?: string | null
+          privacy_notice_presented_at?: string
+          privacy_notice_version?: string
           profile_photo_url?: string | null
           referral_source_id?: number | null
           study_field_id?: number | null
           terms_accepted_at: string
+          terms_version?: string
           university_id?: number | null
           unsubscribe_token?: string
           updated_at?: string
@@ -721,10 +753,13 @@ export type Database = {
           marketing_consent?: boolean
           phone?: string | null
           phone_country_id?: string | null
+          privacy_notice_presented_at?: string
+          privacy_notice_version?: string
           profile_photo_url?: string | null
           referral_source_id?: number | null
           study_field_id?: number | null
           terms_accepted_at?: string
+          terms_version?: string
           university_id?: number | null
           unsubscribe_token?: string
           updated_at?: string
@@ -874,6 +909,30 @@ export type Database = {
           is_active?: boolean
           name?: string
           sort_order?: number
+        }
+        Relationships: []
+      }
+      rights_requests: {
+        Row: {
+          created_at: string
+          details: string | null
+          email: string
+          id: string
+          request_type: string
+        }
+        Insert: {
+          created_at?: string
+          details?: string | null
+          email: string
+          id?: string
+          request_type: string
+        }
+        Update: {
+          created_at?: string
+          details?: string | null
+          email?: string
+          id?: string
+          request_type?: string
         }
         Relationships: []
       }
@@ -1158,7 +1217,11 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {},
   },
 } as const
+

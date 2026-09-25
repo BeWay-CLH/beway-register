@@ -41,7 +41,10 @@ type ExperienciaFormProps = {
 
 export function ExperienciaForm({ entries, experienceTypes, sectors }: ExperienciaFormProps) {
   const router = useRouter();
-  const [editingId, setEditingId] = useState<string | "new" | null>(entries.length === 0 ? "new" : null);
+  // Etapa opcional (lib/cv-vivo/stages.ts): a diferencia de las etapas
+  // obligatorias, no arranca con el formulario ya abierto — el usuario
+  // puede llegar, ver que puede saltarla, y continuar sin fricción.
+  const [editingId, setEditingId] = useState<string | "new" | null>(null);
   // Cubre tanto guardar como eliminar: vive en el padre para que siga
   // visible mientras router.refresh() trae los datos reales, aunque el
   // formulario hijo que lo disparó ya se haya desmontado.
@@ -106,16 +109,23 @@ export function ExperienciaForm({ entries, experienceTypes, sectors }: Experienc
           experienceTypes={experienceTypes}
           sectors={sectors}
           onSaved={handleSaved}
-          onCancel={entries.length === 0 ? undefined : () => setEditingId(null)}
+          onCancel={() => setEditingId(null)}
         />
       ) : atLimit ? (
         <p className="text-center font-body text-small text-text-muted">
           Ya agregaste el máximo de {MAX_REPEATABLE_ENTRIES} experiencias.
         </p>
       ) : (
-        <Button variant="outline" icon={Plus} onClick={() => setEditingId("new")} disabled={isRefreshing}>
-          Agregar otra experiencia
-        </Button>
+        <div className="flex flex-col gap-2">
+          <Button variant="outline" icon={Plus} onClick={() => setEditingId("new")} disabled={isRefreshing}>
+            {entries.length === 0 ? "Agregar experiencia" : "Agregar otra experiencia"}
+          </Button>
+          {entries.length === 0 && (
+            <p className="text-center font-body text-[12px] text-text-muted">
+              Esta etapa es opcional — puedes continuar sin añadir ninguna.
+            </p>
+          )}
+        </div>
       )}
     </div>
   );

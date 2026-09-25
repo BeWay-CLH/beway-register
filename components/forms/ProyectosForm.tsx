@@ -36,7 +36,10 @@ type ProyectosFormProps = {
 
 export function ProyectosForm({ entries, projectTypes }: ProyectosFormProps) {
   const router = useRouter();
-  const [editingId, setEditingId] = useState<string | "new" | null>(entries.length === 0 ? "new" : null);
+  // Etapa opcional (lib/cv-vivo/stages.ts): a diferencia de las etapas
+  // obligatorias, no arranca con el formulario ya abierto — el usuario
+  // puede llegar, ver que puede saltarla, y continuar sin fricción.
+  const [editingId, setEditingId] = useState<string | "new" | null>(null);
   // Cubre tanto guardar como eliminar: vive en el padre para que siga
   // visible mientras router.refresh() trae los datos reales, aunque el
   // formulario hijo que lo disparó ya se haya desmontado.
@@ -103,16 +106,23 @@ export function ProyectosForm({ entries, projectTypes }: ProyectosFormProps) {
           entry={editingEntry}
           projectTypes={projectTypes}
           onSaved={handleSaved}
-          onCancel={entries.length === 0 ? undefined : () => setEditingId(null)}
+          onCancel={() => setEditingId(null)}
         />
       ) : atLimit ? (
         <p className="text-center font-body text-small text-text-muted">
           Ya agregaste el máximo de {MAX_REPEATABLE_ENTRIES} proyectos.
         </p>
       ) : (
-        <Button variant="outline" icon={Plus} onClick={() => setEditingId("new")} disabled={isRefreshing}>
-          Agregar otro proyecto
-        </Button>
+        <div className="flex flex-col gap-2">
+          <Button variant="outline" icon={Plus} onClick={() => setEditingId("new")} disabled={isRefreshing}>
+            {entries.length === 0 ? "Agregar proyecto" : "Agregar otro proyecto"}
+          </Button>
+          {entries.length === 0 && (
+            <p className="text-center font-body text-[12px] text-text-muted">
+              Esta etapa es opcional — puedes continuar sin añadir ninguno.
+            </p>
+          )}
+        </div>
       )}
     </div>
   );

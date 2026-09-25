@@ -26,10 +26,13 @@ export const registroSchema = z
       .int()
       .positive("Selecciona tu universidad."),
     studyFieldId: z.coerce.number().int().positive("Selecciona tu carrera."),
-    referralSourceId: z.coerce
-      .number()
-      .int()
-      .positive("Cuéntanos cómo te enteraste de BeWay."),
+    // Opcional (BEWAY | Pre-Registro · Cambios UX + legal, sección 3): no
+    // debe bloquear la creación de cuenta. El Select sin seleccionar manda
+    // "", que z.coerce.number() convertiría en NaN — se normaliza antes.
+    referralSourceId: z.preprocess(
+      (value) => (value === "" || value === undefined ? undefined : value),
+      z.coerce.number().int().positive().optional(),
+    ),
     turnstileToken: z.string().min(1, "Verificación anti-bot pendiente."),
   })
   .extend(consentsSchema.shape);

@@ -1,4 +1,5 @@
 import { EmailShell, Header, Banderola, Footer, TextBlock, BodyText, DataList, Callout } from "./components";
+import { GENERAL_CONTACT_EMAIL } from "@/lib/legal/constants";
 
 type DataRequestConfirmationEmailProps = {
   action: "export" | "deletion";
@@ -54,6 +55,14 @@ export function DataRequestConfirmationEmail({ action, requestedAt, timezoneLabe
         ]}
       />
       <Callout tone="neutral">{copy.retentionNote}</Callout>
+      <tr>
+        <td className="gutter" style={{ padding: "16px 40px 0" }}>
+          <BodyText muted last>
+            Si tú no solicitaste esta {action === "export" ? "exportación" : "eliminación"} o crees que ha habido
+            algún error, escríbenos a {GENERAL_CONTACT_EMAIL}.
+          </BodyText>
+        </td>
+      </tr>
       <Banderola />
       <Footer category="transactional" />
     </EmailShell>

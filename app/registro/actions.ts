@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { verifyTurnstileToken } from "@/lib/turnstile";
 import { getRequestIp, ipRateLimit } from "@/lib/rate-limit";
 import { registroSchema, type RegistroInput } from "@/lib/validations/registro";
+import { TERMS_VERSION, PRIVACY_NOTICE_VERSION } from "@/lib/legal/constants";
 
 export type RegisterAccountResult =
   | { status: "success" }
@@ -78,8 +79,14 @@ export async function registerAccount(
       country_id: data.countryId,
       university_id: data.universityId,
       study_field_id: data.studyFieldId,
-      referral_source_id: data.referralSourceId,
+      referral_source_id: data.referralSourceId ?? null,
       terms_accepted_at: termsAcceptedAt,
+      terms_version: TERMS_VERSION,
+      // Privacidad no lleva checkbox de aceptación (BEWAY | Pre-Registro ·
+      // Cambios UX + legal, 3.1) — lo que se registra es que el aviso se
+      // PRESENTÓ antes de crear la cuenta, no una aceptación explícita.
+      privacy_notice_version: PRIVACY_NOTICE_VERSION,
+      privacy_notice_presented_at: termsAcceptedAt,
       marketing_consent: data.marketingConsent,
     });
 

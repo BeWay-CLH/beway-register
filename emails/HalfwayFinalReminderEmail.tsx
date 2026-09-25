@@ -33,7 +33,7 @@ export function HalfwayFinalReminderEmail({
         Este es el último recordatorio puntual sobre tu CV Vivo — no queremos saturarte. La insignia de fundador
         sigue disponible cuando quieras retomarlo, y las empresas del ecosistema la verán en tu perfil.
       </Callout>
-      <EmailButton href={ctaUrl} label="Continuar donde quedé" />
+      <EmailButton href={ctaUrl} label="Terminar mi CV Vivo" />
       <Banderola />
       <Footer category="communication" unsubscribeUrl={unsubscribeUrl} />
     </EmailShell>

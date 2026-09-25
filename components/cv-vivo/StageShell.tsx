@@ -15,6 +15,10 @@ type StageShellProps = {
   description: string;
   /** Tarjeta "Por qué lo pedimos" debajo del formulario — se omite si no se pasa. */
   whyText?: string;
+  /** Etiqueta junto a "Etapa X de Y" — hoy solo "Opcional" (Experiencia,
+   * Proyectos): deja claro antes de entrar que 0 entradas no bloquea el
+   * perfil. */
+  badge?: string;
   children: ReactNode;
 };
 
@@ -26,7 +30,7 @@ type StageShellProps = {
 // sticky del pie cuando una etapa tiene muchas entradas y hay que
 // desplazarse — en su lugar, el encabezado y el pie redondean sus propias
 // esquinas para calzar con el radio de la tarjeta.
-export function StageShell({ slug, title, description, whyText, children }: StageShellProps) {
+export function StageShell({ slug, title, description, whyText, badge, children }: StageShellProps) {
   const router = useRouter();
   const { position, total } = getStagePosition(slug);
   const { prevSlug, nextSlug } = getAdjacentSlugs(slug);
@@ -35,9 +39,16 @@ export function StageShell({ slug, title, description, whyText, children }: Stag
     <div className="flex w-full max-w-[780px] flex-col gap-4">
       <Card padding="none" elevation="sm">
         <div className="rounded-t-lg border-b border-border-subtle bg-gradient-to-b from-surface-accent-subtle to-surface-card px-6 py-5">
-          <span className="font-body text-eyebrow uppercase text-brand-cyan-600">
-            Etapa {position} de {total}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="font-body text-eyebrow uppercase text-brand-cyan-600">
+              Etapa {position} de {total}
+            </span>
+            {badge && (
+              <span className="rounded-pill bg-surface-sunken px-2 py-0.5 font-body text-[11px] font-semibold uppercase tracking-caps text-text-muted">
+                {badge}
+              </span>
+            )}
+          </div>
           <h1 className="mt-2.5 font-heading text-h1 text-text-heading">{title}</h1>
           <p className="mt-1.5 max-w-[560px] font-body text-body leading-relaxed text-text-muted">{description}</p>
         </div>

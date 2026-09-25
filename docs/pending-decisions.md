@@ -23,4 +23,17 @@ Documento vivo. El agente `planner` lo revisa antes de cada nueva planificación
 | R1 | Incentivo por completar el CV Vivo | Insignia especial de "completitud 100%", visible para empresas |
 | R2 | Reutilización de campos entre cuenta y CV Vivo | Universidad y carrera capturadas en el Paso 1 se pre-cargan en la Etapa 4; no se piden dos veces |
 | R3 | Límite de entradas en campos repetibles | Máximo 3 por campo (Experiencia, Proyectos y Actividades, Formación Complementaria), modelado como 1:N para poder extenderse después sin migración |
-| R9 | ¿Cómo se genera el CV en PDF con marca BeWay? | Feedback de negocio: `@react-pdf/renderer`, plantilla en `lib/cv-pdf/`. Fuentes de marca embebidas como `data:` URL (un Buffer crudo falla en runtime pese a lo que sugiere la documentación); logo del header es `logo-icon-transparent.png` — ver nota sobre PNGs truncados abajo |
+| R4 | Visibilidad de perfil por defecto | `profile_visibility` pasa de `'companies_only'` a `'private'` (migración `20260907090000_legal_consent_versions.sql`), por requisito explícito de "BEWAY \| Pre-Registro · Cambios UX + legal" v3.0, sección 5: crear una cuenta no debe hacer nada visible para empresas |
+| R5 | ¿Se mueven Universidad/Carrera del registro al CV Vivo? | El documento legal v3.0 lo recomienda ("no bloquear la creación de cuenta"), pero contradice R2 y es un cambio de schema/Server Action, no solo de copy — se mantienen obligatorias en el Paso 1 tal como están hoy |
+| R6 | ¿Checkbox de edad mínima (18+) del documento legal v3.0? | No se añade todavía: está condicionado en el propio documento a que Producto+Legal aprueben esa política, y la decisión #5 de esta tabla sigue pendiente |
+| R7 | Experiencia y Proyectos: ¿obligatorias u opcionales en el CV Vivo? | Feedback de negocio (sept. 2026): pasan a opcionales — `optional: true` en `lib/cv-vivo/stages.ts`. Vacías, se excluyen del denominador del % y de la insignia de 100%; si el usuario añade algo, cuentan igual que cualquier otra etapa |
+| R8 | ¿"Mi CV" debe mostrar las descripciones largas completas o truncadas? | Feedback de negocio: completas siempre, sin `line-clamp`. Se agregó `description` a Educación y Experiencia en `app/cuenta/page.tsx`/`PerfilPanels.tsx` (antes no se mostraba en absoluto) y se quitó el `line-clamp-3` de Proyectos |
+| R9 | ¿Cómo se genera el CV en PDF con marca BeWay? | Feedback de negocio: `@react-pdf/renderer`, plantilla en `lib/cv-pdf/`. Fuentes de marca embebidas como `data:` URL (un Buffer crudo falla en runtime pese a lo que sugiere la documentación); logo del header es `logo-icon-transparent.png` — ver decisión pendiente #11 sobre PNGs truncados |
+
+## Nuevo desde "BEWAY | Pre-Registro · Cambios UX + legal" (v3.0, sept. 2026)
+
+Implementado con los textos legales completos (Términos, Privacidad, Aviso Legal, Cookies, `/derechos`) usando los
+placeholders `[RAZÓN SOCIAL]`, `[NIF]`, `[DOMICILIO]`, `[EMAIL PRIVACIDAD]`, `[FECHA]` tal como los trae el
+documento — visibles a propósito (`grep -r "\[COMPLETAR\|RAZÓN SOCIAL\|NIF\]\|DOMICILIO\]\|EMAIL PRIVACIDAD\]" components/legal`)
+hasta que Negocio/Legal los cierre. **No deben salir a producción con placeholders** — ver "Antes de publicar" en el
+propio documento. Relacionado con la decisión #2 de arriba.

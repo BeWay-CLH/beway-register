@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
-import { Mail, User, ShieldCheck, ArrowRight } from "lucide-react";
+import { Mail, User, ShieldCheck, ArrowRight, ChevronDown } from "lucide-react";
 import { registroSchema, type RegistroInput } from "@/lib/validations/registro";
 import { registerAccount } from "@/app/registro/actions";
 import { Card } from "@/components/ui/Card";
@@ -20,6 +20,8 @@ import { FormField } from "@/components/cv-vivo/FormField";
 import { PasswordField } from "@/components/forms/PasswordField";
 import { UniversitySelect } from "@/components/forms/UniversitySelect";
 import { Turnstile } from "@/components/forms/Turnstile";
+import { LegalDocumentModal } from "@/components/forms/LegalDocumentModal";
+import { TerminosContent, PrivacidadContent, PrivacyNoticeSummary } from "@/components/legal/LegalContent";
 
 type RegistroFormValues = z.input<typeof registroSchema>;
 
@@ -34,6 +36,7 @@ export function RegistroForm({ countries, studyFields, referralSources }: Regist
   const [isPending, startTransition] = useTransition();
   const [formError, setFormError] = useState<string | null>(null);
   const [confirmEmail, setConfirmEmail] = useState<string | null>(null);
+  const [openLegalDoc, setOpenLegalDoc] = useState<"terminos" | "privacidad" | null>(null);
 
   const {
     register,
@@ -89,7 +92,7 @@ export function RegistroForm({ countries, studyFields, referralSources }: Regist
   return (
     <Card padding="none" elevation="md" className="w-full max-w-[560px] overflow-hidden">
       <div className="rounded-t-lg border-b border-border-subtle bg-gradient-to-b from-surface-accent-subtle to-surface-card px-6 py-5">
-        <h2 className="font-heading text-h1 text-text-heading">Crear mi perfil</h2>
+        <h2 className="font-heading text-h1 text-text-heading">Crear mi cuenta</h2>
         <p className="mt-1.5 font-body text-small text-text-muted">Dos minutos. Sin coste para el talento.</p>
       </div>
 
@@ -130,7 +133,7 @@ export function RegistroForm({ countries, studyFields, referralSources }: Regist
         </FieldGroup>
 
         <FieldGroup title="Contexto académico" caption="Puedes ampliarlo después">
-          <FormField label="País" required span={5} htmlFor="countryId" error={errors.countryId?.message}>
+          <FormField label="País de residencia" required span={5} htmlFor="countryId" error={errors.countryId?.message}>
             <Select
               id="countryId"
               placeholder="Selecciona tu país"
@@ -168,8 +171,7 @@ export function RegistroForm({ countries, studyFields, referralSources }: Regist
           </FormField>
 
           <FormField
-            label="¿Cómo nos conociste?"
-            required
+            label="¿Cómo nos conociste? (opcional)"
             span={5}
             htmlFor="referralSourceId"
             error={errors.referralSourceId?.message}
@@ -210,11 +212,52 @@ export function RegistroForm({ countries, studyFields, referralSources }: Regist
           </div>
 
           <Checkbox
-            label="Acepto los Términos y Condiciones y la Política de Privacidad de BeWay."
+            label={
+              <>
+                He leído y acepto los{" "}
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    setOpenLegalDoc("terminos");
+                  }}
+                  className="font-semibold text-link underline hover:text-link-hover"
+                >
+                  Términos de Uso
+                </button>{" "}
+                del Pre-Registro de BeWay.
+              </>
+            }
             error={errors.acceptedTerms?.message}
             {...register("acceptedTerms")}
           />
-          <Switch label="Recibir oportunidades y novedades de BeWay por correo" {...register("marketingConsent")} />
+
+          {/* Sin checkbox (BEWAY | Pre-Registro · Cambios UX + legal, 3.1):
+              es información, no un consentimiento que aceptar. <details>
+              nativo — cerrado por defecto, se abre antes de crear la
+              cuenta sin bloquear el envío del formulario. */}
+          <details className="group rounded-md border border-border-subtle bg-surface-sunken px-4 py-3">
+            <summary className="flex cursor-pointer list-none items-center gap-2 font-body text-small text-text-body">
+              Información básica de privacidad · Ver detalles
+              <ChevronDown size={16} className="ml-auto text-text-muted transition-transform group-open:rotate-180" />
+            </summary>
+            <div className="mt-3 flex flex-col gap-2">
+              <PrivacyNoticeSummary />
+              <button
+                type="button"
+                onClick={() => setOpenLegalDoc("privacidad")}
+                className="self-start font-body text-[12px] font-semibold text-link underline hover:text-link-hover"
+              >
+                Política de Privacidad
+              </button>
+            </div>
+          </details>
+
+          <Switch
+            label="Quiero recibir oportunidades, eventos y novedades de BeWay por correo. Puedo darme de baja cuando quiera."
+            {...register("marketingConsent")}
+          />
         </div>
 
         {formError && (
@@ -237,10 +280,25 @@ export function RegistroForm({ countries, studyFields, referralSources }: Regist
             loading={isPending}
             disabled={!acceptedTerms}
           >
-            {isPending ? "Creando cuenta…" : "Crear mi perfil"}
+            {isPending ? "Creando cuenta…" : "Crear mi cuenta"}
           </Button>
         </div>
       </form>
+
+      {openLegalDoc === "terminos" && (
+        <LegalDocumentModal title="Términos de Uso" fullPageHref="/terminos" onClose={() => setOpenLegalDoc(null)}>
+          <TerminosContent />
+        </LegalDocumentModal>
+      )}
+      {openLegalDoc === "privacidad" && (
+        <LegalDocumentModal
+          title="Política de Privacidad"
+          fullPageHref="/privacidad"
+          onClose={() => setOpenLegalDoc(null)}
+        >
+          <PrivacidadContent />
+        </LegalDocumentModal>
+      )}
     </Card>
   );
 }

@@ -10,8 +10,11 @@ type BrandPanelProps = {
   showStats?: boolean;
 };
 
+// "+120 empresas del ecosistema" (BeWay Design System original) es una cifra
+// comercial que hoy no se puede acreditar — BEWAY | Pre-Registro · Cambios
+// UX + legal, sección 2, pide sustituirla por una métrica de producto real.
 const STATS: [string, string][] = [
-  ["+120", "empresas del ecosistema"],
+  ["10", "etapas guardables"],
   ["10 min", "para tu CV Vivo"],
   ["0 €", "para el talento"],
 ];

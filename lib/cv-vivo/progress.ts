@@ -9,6 +9,7 @@ export type StageProgress = {
   label: string;
   implemented: boolean;
   isComplete: boolean;
+  optional: boolean;
 };
 
 export type WizardProgress = {
@@ -34,17 +35,26 @@ export function getWizardProgress(ctx: WizardContext): WizardProgress {
     label: stage.label,
     implemented: stage.implemented,
     isComplete: stage.isComplete(ctx),
+    optional: stage.optional ?? false,
   }));
 
-  const completedCount = stages.filter((s) => s.isComplete).length;
-  const totalCount = stages.length;
+  // Etapas opcionales (Experiencia, Proyectos) nunca deben RESTAR del %:
+  // vacías, se excluyen del denominador; si el usuario sí añadió algo,
+  // suman como cualquier otra etapa completa. Así el 100% (y la insignia
+  // de fundador) es alcanzable sin experiencia laboral ni proyectos.
+  const countedStages = stages.filter((s) => !s.optional || s.isComplete);
+  const completedCount = countedStages.filter((s) => s.isComplete).length;
+  const totalCount = countedStages.length;
   const percent = Math.round((completedCount / totalCount) * 100);
 
-  // Solo etapas implementadas pueden ser "la siguiente" — un stub nunca
-  // debe interceptar la navegación. Si ya se completó todo lo publicado,
-  // el fallback es la última etapa implementada, no la primera del wizard.
+  // Solo etapas implementadas y no-opcionales pueden ser "la siguiente" —
+  // un stub nunca debe interceptar la navegación, y una etapa opcional
+  // vacía no debe seguir empujando al usuario de vuelta a ella (ej. el
+  // redirect de /cv-vivo) una vez ya completó todo lo obligatorio. Si ya
+  // se completó todo lo publicado, el fallback es la última etapa
+  // implementada, no la primera del wizard.
   const implementedStages = stages.filter((s) => s.implemented);
-  const nextIncomplete = implementedStages.find((s) => !s.isComplete);
+  const nextIncomplete = implementedStages.find((s) => !s.isComplete && !s.optional);
   const fallbackSlug = implementedStages.at(-1)?.slug ?? stages[0].slug;
 
   return {

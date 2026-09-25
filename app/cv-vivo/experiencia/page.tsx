@@ -36,8 +36,9 @@ export default async function ExperienciaPage() {
     <StageShell
       slug="experiencia"
       title="Experiencia"
-      description="Muestra a las empresas el tipo de trabajo que ya has hecho, aunque sea poco. Hasta 3 experiencias laborales, prácticas o freelance."
+      description="Muestra a las empresas el tipo de trabajo que ya has hecho, aunque sea poco. Hasta 3 experiencias laborales, prácticas o freelance. Si todavía no has tenido ninguna, puedes continuar sin añadir nada."
       whyText="Tu experiencia permite emparejarte con internships y programas de empleo que valoran candidatos con aplicación práctica en el mundo real. Puedes editarla en cualquier momento desde tu perfil."
+      badge="Opcional"
     >
       <ExperienciaForm
         entries={entries}

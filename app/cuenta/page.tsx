@@ -78,6 +78,7 @@ export default async function CuentaPage() {
     startDate: row.start_date,
     endDate: row.end_date,
     isCurrent: row.is_current,
+    description: row.description,
   }));
 
   const experiences = (experienceRows ?? []).map((row) => ({
@@ -87,6 +88,7 @@ export default async function CuentaPage() {
     startDate: row.start_date,
     endDate: row.end_date,
     isCurrent: row.is_current,
+    description: row.description,
   }));
 
   const languages = (languageRows ?? []).map((row) => ({

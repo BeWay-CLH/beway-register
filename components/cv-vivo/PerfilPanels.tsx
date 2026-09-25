@@ -118,6 +118,7 @@ type EducationSummary = {
   startDate: string | null;
   endDate: string | null;
   isCurrent: boolean;
+  description: string | null;
 };
 
 type ExperienceSummary = {
@@ -127,6 +128,7 @@ type ExperienceSummary = {
   startDate: string | null;
   endDate: string | null;
   isCurrent: boolean;
+  description: string | null;
 };
 
 type LanguageSummary = { id: string; languageName: string; proficiencyName: string };
@@ -151,13 +153,23 @@ export function CVPanel({ education, experiences, languages, bio }: CVPanelProps
         {education.length === 0 ? (
           <EmptyStageNote slug="educacion">Aún no agregaste tu formación académica.</EmptyStageNote>
         ) : (
-          <ul className="flex flex-col gap-2">
+          <ul className="flex flex-col gap-3">
             {education.map((entry) => (
               <li key={entry.id} className="font-body text-small text-text-body">
-                <span className="font-medium">{entry.studyFieldName ?? "Carrera sin especificar"}</span>
-                {" · "}
-                {entry.universityName ?? "Universidad sin especificar"}
-                <span className="text-text-muted"> · {formatRange(entry.startDate, entry.endDate, entry.isCurrent)}</span>
+                <p>
+                  <span className="font-medium">{entry.studyFieldName ?? "Carrera sin especificar"}</span>
+                  {" · "}
+                  {entry.universityName ?? "Universidad sin especificar"}
+                  <span className="text-text-muted">
+                    {" "}
+                    · {formatRange(entry.startDate, entry.endDate, entry.isCurrent)}
+                  </span>
+                </p>
+                {entry.description && (
+                  <p className="mt-1 whitespace-pre-line font-body text-small leading-relaxed text-text-muted">
+                    {entry.description}
+                  </p>
+                )}
               </li>
             ))}
           </ul>
@@ -169,11 +181,21 @@ export function CVPanel({ education, experiences, languages, bio }: CVPanelProps
         {experiences.length === 0 ? (
           <EmptyStageNote slug="experiencia">Aún no agregaste experiencia laboral.</EmptyStageNote>
         ) : (
-          <ul className="flex flex-col gap-2">
+          <ul className="flex flex-col gap-3">
             {experiences.map((entry) => (
               <li key={entry.id} className="font-body text-small text-text-body">
-                <span className="font-medium">{entry.roleTitle}</span> · {entry.companyName}
-                <span className="text-text-muted"> · {formatRange(entry.startDate, entry.endDate, entry.isCurrent)}</span>
+                <p>
+                  <span className="font-medium">{entry.roleTitle}</span> · {entry.companyName}
+                  <span className="text-text-muted">
+                    {" "}
+                    · {formatRange(entry.startDate, entry.endDate, entry.isCurrent)}
+                  </span>
+                </p>
+                {entry.description && (
+                  <p className="mt-1 whitespace-pre-line font-body text-small leading-relaxed text-text-muted">
+                    {entry.description}
+                  </p>
+                )}
               </li>
             ))}
           </ul>
@@ -299,7 +321,9 @@ export function ProofPanel({ projects }: { projects: ProjectSummary[] }) {
               <div>
                 <p className="font-body text-small font-semibold text-text-body">{project.name}</p>
                 {project.description && (
-                  <p className="mt-1 line-clamp-3 font-body text-[12px] text-text-muted">{project.description}</p>
+                  <p className="mt-1 whitespace-pre-line font-body text-[12px] leading-relaxed text-text-muted">
+                    {project.description}
+                  </p>
                 )}
               </div>
               <div className="mt-auto flex items-center justify-between gap-2">
